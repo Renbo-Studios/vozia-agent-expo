@@ -1,0 +1,95 @@
+{
+  "name": "@vozia/agent",
+  "version": "1.0.0",
+  "description": "Vozia AI Agent SDK - Chat, Voice, and Tools for Expo/React Native",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./components": {
+      "import": "./dist/components/index.mjs",
+      "require": "./dist/components/index.js",
+      "types": "./dist/components/index.d.ts"
+    },
+    "./hooks": {
+      "import": "./dist/hooks/index.mjs",
+      "require": "./dist/hooks/index.js",
+      "types": "./dist/hooks/index.d.ts"
+    },
+    "./voice": {
+      "import": "./dist/voice/index.mjs",
+      "require": "./dist/voice/index.js",
+      "types": "./dist/voice/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts,.tsx",
+    "clean": "rimraf dist"
+  },
+  "peerDependencies": {
+    "expo": ">=49.0.0",
+    "expo-av": ">=13.0.0",
+    "expo-haptics": ">=12.0.0",
+    "expo-speech": ">=11.0.0",
+    "react": ">=18.0.0",
+    "react-native": ">=0.72.0",
+    "react-native-reanimated": ">=3.0.0"
+  },
+  "peerDependenciesMeta": {
+    "expo-av": {
+      "optional": true
+    },
+    "expo-haptics": {
+      "optional": true
+    },
+    "expo-speech": {
+      "optional": true
+    },
+    "react-native-reanimated": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "@react-native-async-storage/async-storage": "^1.21.0",
+    "zustand": "^4.4.7"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.45",
+    "@types/react-native": "^0.72.8",
+    "react": "^18.2.0",
+    "react-native": "^0.72.0",
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.2"
+  },
+  "keywords": [
+    "vozia",
+    "ai",
+    "agent",
+    "expo",
+    "react-native",
+    "chat",
+    "voice",
+    "assistant",
+    "sdk",
+    "chatbot"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vozia/vozia-agent-expo.git",
+    "directory": "packages/agent"
+  },
+  "author": "Vozia",
+  "license": "MIT"
+}
