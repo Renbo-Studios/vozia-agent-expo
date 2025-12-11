@@ -125,12 +125,10 @@ export const DEFAULT_DARK_THEME: AgentTheme = {
  * Validate agent configuration
  */
 export function validateConfig(config: AgentConfig): void {
-  if (!config.orgId || typeof config.orgId !== 'string') {
-    throw new Error('AgentConfig: orgId is required and must be a string');
-  }
 
-  if (!config.assistantId || typeof config.assistantId !== 'string') {
-    throw new Error('AgentConfig: assistantId is required and must be a string');
+
+  if (!config.agentId || typeof config.agentId !== 'string') {
+    throw new Error('AgentConfig: agentId is required and must be a string');
   }
 
   if (!config.apiKey || typeof config.apiKey !== 'string') {
@@ -148,7 +146,7 @@ export function validateConfig(config: AgentConfig): void {
 export function mergeConfig(config: AgentConfig): Required<Omit<AgentConfig, 'jwt'>> & Pick<AgentConfig, 'jwt'> {
   return {
     orgId: config.orgId,
-    assistantId: config.assistantId,
+    agentId: config.agentId,
     apiKey: config.apiKey,
     baseUrl: config.baseUrl || DEFAULT_BASE_URL,
     userId: config.userId || generateUserId(),

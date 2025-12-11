@@ -1,5 +1,5 @@
 // ============================================================================
-// VOZIA AGENT SDK - useAssistantButton HOOK
+// VOZIA AGENT SDK - useAgentButton HOOK
 // ============================================================================
 
 import { useState, useCallback, useMemo } from 'react';
@@ -9,7 +9,7 @@ import type { ButtonPosition } from '../types';
 // Types
 // ----------------------------------------------------------------------------
 
-export interface UseAssistantButtonOptions {
+export interface UseAgentButtonOptions {
   /** Initial visibility state */
   initialVisible?: boolean;
   /** Initial open state */
@@ -26,7 +26,7 @@ export interface UseAssistantButtonOptions {
   onClose?: () => void;
 }
 
-export interface UseAssistantButtonReturn {
+export interface UseAgentButtonReturn {
   // State
   isVisible: boolean;
   isOpen: boolean;
@@ -54,11 +54,11 @@ export interface UseAssistantButtonReturn {
 // ----------------------------------------------------------------------------
 
 /**
- * Hook for managing the floating assistant button state
+ * Hook for managing the floating agent button state
  */
-export function useAssistantButton(
-  options: UseAssistantButtonOptions = {}
-): UseAssistantButtonReturn {
+export function useAgentButton(
+  options: UseAgentButtonOptions = {}
+): UseAgentButtonReturn {
   const [isVisible, setIsVisible] = useState(options.initialVisible ?? true);
   const [isOpen, setIsOpen] = useState(options.initialOpen ?? false);
   const [position, setPositionState] = useState<ButtonPosition>(

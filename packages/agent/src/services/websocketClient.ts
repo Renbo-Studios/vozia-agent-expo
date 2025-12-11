@@ -2,7 +2,7 @@
 // VOZIA AGENT SDK - WEBSOCKET CLIENT
 // ============================================================================
 
-import type { AgentError, ConnectionStatus } from '../types';
+import type { ConnectionStatus } from '../types';
 import { CONSTANTS } from '../core/config';
 import { EventEmitter } from '../utils/eventEmitter';
 
@@ -41,8 +41,8 @@ export class WebSocketClient {
   private ws: WebSocket | null = null;
   private eventEmitter: EventEmitter<WebSocketEvent>;
   private reconnectAttempts = 0;
-  private reconnectTimeout: NodeJS.Timeout | null = null;
-  private pingInterval: NodeJS.Timeout | null = null;
+  private reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
+  private pingInterval: ReturnType<typeof setInterval> | null = null;
   private status: ConnectionStatus = 'disconnected';
   private manualClose = false;
 
@@ -210,7 +210,7 @@ export class WebSocketClient {
     this.ws.onclose = (event) => {
       this.log('Closed', { code: event.code, reason: event.reason });
       this.clearTimers();
-      this.emit({ type: 'close', code: event.code, reason: event.reason });
+      this.emit({ type: 'close', code: event.code ?? 1000, reason: event.reason ?? '' });
 
       if (!this.manualClose && this.config.reconnect) {
         this.scheduleReconnect();

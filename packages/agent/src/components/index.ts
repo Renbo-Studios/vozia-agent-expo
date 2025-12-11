@@ -42,11 +42,11 @@ export {
 
 // Common components
 export {
-  AssistantButton,
+  AgentButton,
   FloatingButton,
-  AssistantFAB,
+  AgentFAB,
   type FloatingButtonProps,
-  type AssistantFABProps,
+  type AgentFABProps,
 } from './common';
 
 // Support components

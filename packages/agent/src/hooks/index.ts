@@ -13,7 +13,7 @@ export {
   getDeviceInfoTool,
 } from './useTools';
 export {
-  useAssistantButton,
-  type UseAssistantButtonOptions,
-  type UseAssistantButtonReturn,
-} from './useAssistantButton';
+  useAgentButton,
+  type UseAgentButtonOptions,
+  type UseAgentButtonReturn,
+} from './useAgentButton';

@@ -10,10 +10,10 @@
  * Main configuration for initializing the Vozia Agent SDK
  */
 export interface AgentConfig {
-  /** Organization ID from your Vozia dashboard */
-  orgId: string;
-  /** Assistant/Agent ID to connect to */
-  assistantId: string;
+  /** Organization ID from your Vozia dashboard (optional) */
+  orgId?: string;
+  /** Agent/Assistant ID to connect to */
+  agentId: string;
   /** API key for authentication */
   apiKey: string;
   /** Base URL for the Vozia API (optional, defaults to production) */
@@ -193,8 +193,8 @@ export type SessionStatus = 'active' | 'completed' | 'abandoned';
 export interface Session {
   /** Unique session ID */
   id: string;
-  /** Associated assistant ID */
-  assistantId: string;
+  /** Associated agent ID */
+  agentId: string;
   /** End user ID */
   endUserId?: string;
   /** Session status */
@@ -536,7 +536,7 @@ export interface ChatResponse {
  * Streaming event from SSE
  */
 export interface StreamEvent {
-  type: 'thinking' | 'token' | 'complete' | 'error';
+  type: 'thinking' | 'token' | 'complete' | 'error' | 'chunk';
   content?: string;
   message?: string;
   sessionId?: string;
@@ -574,9 +574,9 @@ export type ButtonPosition =
   | 'top-left';
 
 /**
- * Assistant button props
+ * Agent button props (formerly AssistantButtonProps)
  */
-export interface AssistantButtonProps extends BaseComponentProps {
+export interface AgentButtonProps extends BaseComponentProps {
   /** Button position on screen */
   position?: ButtonPosition;
   /** Custom icon */

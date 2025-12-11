@@ -94,7 +94,7 @@ export class AgentClient {
     this.eventEmitter = new EventEmitter<AgentEvent>();
     this.tools = new Map();
 
-    this.log('AgentClient initialized', { assistantId: this.config.assistantId });
+    this.log('AgentClient initialized', { agentId: this.config.agentId });
   }
 
   // --------------------------------------------------------------------------
@@ -222,7 +222,7 @@ export class AgentClient {
       let metadata: ChatResponse['metadata'];
 
       const endpoint = API_ENDPOINTS.AGENT_SESSION_MESSAGE(
-        this.config.assistantId,
+        this.config.agentId,
         sessionId
       );
 
@@ -243,6 +243,8 @@ export class AgentClient {
                 break;
 
               case 'token':
+              case 'chunk' as any: // Backend sends 'chunk', handle both
+                // this.log('Event received in AgentClient', { type: event.type, content: event.content });
                 fullResponse += event.content || '';
                 this.emit({ type: 'token', content: event.content || '' });
                 options?.onToken?.(event.content || '');
@@ -298,7 +300,7 @@ export class AgentClient {
    * Synchronous chat implementation
    */
   private async chatSync(message: string, sessionId: string): Promise<ChatResponse> {
-    const endpoint = API_ENDPOINTS.AGENT_TEST(this.config.assistantId);
+    const endpoint = API_ENDPOINTS.AGENT_TEST(this.config.agentId);
 
     const response = await this.httpClient.post<ChatResponse>(endpoint, {
       message,
@@ -340,7 +342,7 @@ export class AgentClient {
     const response = await this.httpClient.post<{ session: Session }>(
       API_ENDPOINTS.SESSIONS,
       {
-        assistantId: this.config.assistantId,
+        agentId: this.config.agentId,
         endUserId: this.config.userId,
         userMetadata: this.config.userMetadata,
       }
@@ -518,7 +520,7 @@ export class AgentClient {
 
     try {
       // Test connection by fetching agent config
-      await this.httpClient.get(API_ENDPOINTS.AGENT(this.config.assistantId));
+      await this.httpClient.get(API_ENDPOINTS.AGENT(this.config.agentId));
 
       this.connectionStatus = 'connected';
       this.emit({ type: 'connected' });

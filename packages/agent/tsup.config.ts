@@ -8,9 +8,9 @@ export default defineConfig({
     'voice/index': 'src/voice/index.ts',
   },
   format: ['cjs', 'esm'],
-  dts: true,
+  dts: false, // Disabled temporarily due to type version conflicts
   splitting: false,
-  sourcemap: true,
+  sourcemap: false,
   clean: true,
   external: [
     'react',

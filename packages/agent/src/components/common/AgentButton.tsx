@@ -1,5 +1,5 @@
 // ============================================================================
-// VOZIA AGENT SDK - ASSISTANT BUTTON COMPONENT
+// VOZIA AGENT SDK - AGENT BUTTON COMPONENT
 // ============================================================================
 
 import React, { useState } from 'react';
@@ -15,26 +15,26 @@ import {
 } from 'react-native';
 import { useTheme } from '../ThemeProvider';
 import { AgentChat } from '../chat/AgentChat';
-import { useAssistantButton } from '../../hooks/useAssistantButton';
-import type { AgentTheme, AssistantButtonProps, ButtonPosition } from '../../types';
+import { useAgentButton } from '../../hooks/useAgentButton';
+import type { AgentTheme, AgentButtonProps, ButtonPosition } from '../../types';
 
 // ----------------------------------------------------------------------------
 // Component
 // ----------------------------------------------------------------------------
 
 /**
- * Floating assistant button that opens a chat modal
+ * Floating agent button that opens a chat modal
  *
  * @example
  * ```tsx
- * <AssistantButton
+ * <AgentButton
  *   position="bottom-right"
  *   size={56}
  *   hapticFeedback={true}
  * />
  * ```
  */
-export function AssistantButton({
+export function AgentButton({
   position = 'bottom-right',
   icon,
   size = 56,
@@ -42,7 +42,7 @@ export function AssistantButton({
   onPress,
   style,
   testID,
-}: AssistantButtonProps) {
+}: AgentButtonProps) {
   const theme = useTheme();
   const styles = createStyles(theme, position, size);
 
@@ -53,7 +53,7 @@ export function AssistantButton({
     open,
     close,
     triggerHaptic,
-  } = useAssistantButton({
+  } = useAgentButton({
     position,
     hapticFeedback,
     onPress,
@@ -147,7 +147,7 @@ export function FloatingButton({
     <TouchableOpacity
       style={[
         styles.button,
-        backgroundColor && { backgroundColor },
+        backgroundColor ? { backgroundColor } : undefined,
         disabled && styles.buttonDisabled,
       ]}
       onPress={onPress}
@@ -167,10 +167,10 @@ export function FloatingButton({
 }
 
 // ----------------------------------------------------------------------------
-// Assistant FAB with Bottom Sheet
+// Agent FAB with Bottom Sheet
 // ----------------------------------------------------------------------------
 
-export interface AssistantFABProps {
+export interface AgentFABProps {
   position?: ButtonPosition;
   size?: number;
   greeting?: string;
@@ -182,14 +182,14 @@ export interface AssistantFABProps {
 /**
  * Floating action button with integrated bottom sheet chat
  */
-export function AssistantFAB({
+export function AgentFAB({
   position = 'bottom-right',
   size = 56,
   greeting,
-  headerTitle = 'Assistant',
+  headerTitle = 'Agent',
   enableVoice = false,
   testID,
-}: AssistantFABProps) {
+}: AgentFABProps) {
   const theme = useTheme();
   const styles = createStyles(theme, position, size);
   const [isOpen, setIsOpen] = useState(false);

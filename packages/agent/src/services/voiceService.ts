@@ -70,7 +70,7 @@ export class VoiceService {
   private recording: AudioRecording | null = null;
   private playback: AudioSound | null = null;
   private currentSession: VoiceSession | null = null;
-  private audioLevelInterval: NodeJS.Timeout | null = null;
+  private audioLevelInterval: ReturnType<typeof setInterval> | null = null;
 
   // Expo-av modules (lazy loaded)
   private Audio: typeof import('expo-av').Audio | null = null;

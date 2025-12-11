@@ -2,7 +2,7 @@
 // VOZIA AGENT SDK - PUSH TO TALK BUTTON COMPONENT
 // ============================================================================
 
-import React, { useCallback, useRef } from 'react';
+import { useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -246,7 +246,7 @@ async function triggerHaptic() {
 // Styles
 // ----------------------------------------------------------------------------
 
-function createStyles(theme: AgentTheme, size: 'small' | 'medium' | 'large') {
+function createStyles(theme: AgentTheme, _size: 'small' | 'medium' | 'large') {
   return StyleSheet.create({
     container: {
       alignItems: 'center',

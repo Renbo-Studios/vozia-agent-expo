@@ -45,7 +45,7 @@ export interface AgentProviderProps {
  * <AgentProvider
  *   config={{
  *     orgId: 'your-org-id',
- *     assistantId: 'your-assistant-id',
+ *     agentId: 'your-agent-id',
  *     apiKey: 'your-api-key',
  *   }}
  *   theme={{

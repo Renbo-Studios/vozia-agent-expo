@@ -94,9 +94,6 @@ const getDeviceInfoTool: ToolDefinition = {
     // This will be enhanced when running in React Native
     const info: Record<string, unknown> = {
       platform: 'unknown',
-      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown',
-      language: typeof navigator !== 'undefined' ? navigator.language : 'unknown',
-      online: typeof navigator !== 'undefined' ? navigator.onLine : true,
     };
 
     // Try to get more info from expo-device if available
@@ -139,7 +136,6 @@ export function useTools(options: UseToolsOptions = {}): UseToolsReturn {
   const clearToolsStore = useToolsStore((s) => s.clearTools);
   const startExecution = useToolsStore((s) => s.startExecution);
   const completeExecution = useToolsStore((s) => s.completeExecution);
-  const failExecution = useToolsStore((s) => s.failExecution);
   const clearHistoryStore = useToolsStore((s) => s.clearHistory);
 
   // Agent store

@@ -7,7 +7,7 @@ import { useChatStore } from '../store/chatStore';
 import { useAgentStore } from '../store/agentStore';
 import { AgentClient } from '../core/AgentClient';
 import { StorageService } from '../services/storageService';
-import { generateMessageId } from '../core/config';
+// import { generateMessageId } from '../core/config';
 import type { Message, ChatResponse, AgentError } from '../types';
 
 // ----------------------------------------------------------------------------
@@ -160,9 +160,10 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
           sessionId: sessionId || undefined,
           stream: true,
           onToken: (token) => {
+            console.log('[useChat] Received token:', token);
             appendStreamContent(token);
           },
-          onThinking: (thinkingMessage) => {
+          onThinking: (_thinkingMessage) => {
             // Could display thinking indicator here
           },
           onComplete: (chatResponse) => {

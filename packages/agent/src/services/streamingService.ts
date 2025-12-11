@@ -1,6 +1,6 @@
 // ============================================================================
 // VOZIA AGENT SDK - STREAMING SERVICE (SSE)
-// ============================================================================
+// ============================================================================ 
 
 import type { AgentError, StreamEvent } from '../types';
 import { CONSTANTS } from '../core/config';
@@ -29,10 +29,11 @@ export interface StreamingCallbacks {
 
 /**
  * Server-Sent Events (SSE) streaming client for real-time responses
+ * Uses XMLHttpRequest for React Native compatibility where fetch stream is not supported
  */
 export class StreamingService {
   private config: Required<Omit<StreamingConfig, 'jwt'>> & Pick<StreamingConfig, 'jwt'>;
-  private abortController: AbortController | null = null;
+  private xhr: XMLHttpRequest | null = null;
   private isConnected = false;
 
   constructor(config: StreamingConfig) {
@@ -61,50 +62,107 @@ export class StreamingService {
     this.disconnect();
 
     const url = this.buildUrl(endpoint);
-    this.abortController = new AbortController();
+    this.log('Connecting to stream (XHR)', { url });
 
-    this.log('Connecting to stream', { url });
-
-    try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: this.buildHeaders(),
-        body: JSON.stringify({ ...body, stream: true }),
-        signal: this.abortController.signal,
+    return new Promise<void>((resolve) => {
+      this.xhr = new XMLHttpRequest();
+      const xhr = this.xhr;
+      
+      xhr.open('POST', url, true);
+      
+      // Set headers
+      const headers = this.buildHeaders();
+      Object.entries(headers).forEach(([key, value]) => {
+        xhr.setRequestHeader(key, value);
       });
 
-      if (!response.ok) {
-        const error = await this.handleErrorResponse(response);
-        callbacks.onError(error);
-        return;
-      }
+      // State for processing
+      let lastProcessedIndex = 0;
+      let buffer = '';
 
-      if (!response.body) {
-        callbacks.onError(this.createError('NETWORK_ERROR', 'No response body'));
-        return;
-      }
+      xhr.onprogress = () => {
+        if (!this.isConnected && xhr.readyState >= 2) {
+           this.isConnected = true;
+        }
 
-      this.isConnected = true;
-      await this.processStream(response.body, callbacks);
-    } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') {
-        this.log('Stream aborted');
-        return;
-      }
+        const responseText = xhr.responseText;
+        const newContent = responseText.substring(lastProcessedIndex);
+        lastProcessedIndex = responseText.length;
 
-      callbacks.onError(this.normalizeError(error));
-    } finally {
-      this.isConnected = false;
-    }
+        if (newContent.length > 0) {
+          // this.log('Received chunk raw:', { length: newContent.length });
+          buffer += newContent;
+          
+          // Process complete SSE messages
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || ''; // Keep incomplete line in buffer
+
+          for (const line of lines) {
+            if (line.trim()) {
+              this.processSSELine(line, callbacks);
+            }
+          }
+        }
+      };
+
+      xhr.onload = () => {
+        this.log('XHR Load Complete', { status: xhr.status });
+        
+        if (xhr.status >= 200 && xhr.status < 300) {
+          // Process any remaining buffer
+          if (buffer.trim()) {
+            this.processSSELine(buffer, callbacks);
+          }
+          callbacks.onComplete();
+        } else {
+           // Handle error response
+           try {
+             const errorData = JSON.parse(xhr.responseText);
+             const errorMessage = errorData.error?.message || errorData.message || `HTTP ${xhr.status}`;
+             callbacks.onError(this.createError('NETWORK_ERROR', errorMessage));
+           } catch (e) {
+             callbacks.onError(this.createError('NETWORK_ERROR', `HTTP ${xhr.status}: ${xhr.statusText}`));
+           }
+        }
+        
+        this.isConnected = false;
+        resolve();
+      };
+
+      xhr.onerror = (e) => {
+        this.log('XHR Error', { error: e });
+        callbacks.onError(this.createError('NETWORK_ERROR', 'Network request failed'));
+        this.isConnected = false;
+        resolve();
+      };
+      
+      xhr.ontimeout = () => {
+        this.log('XHR Timeout');
+        callbacks.onError(this.createError('TIMEOUT_ERROR', 'Request timed out'));
+        this.isConnected = false;
+        resolve();
+      };
+
+      // Set timeout
+      // xhr.timeout = this.config.timeout; // Optional: XHR timeout can be tricky in RN
+
+      // Send request
+      xhr.send(JSON.stringify({ ...body, stream: true }));
+      this.isConnected = true; // Optimistically set connected
+    });
   }
 
   /**
    * Disconnect from streaming
    */
   disconnect(): void {
-    if (this.abortController) {
-      this.abortController.abort();
-      this.abortController = null;
+    if (this.xhr) {
+      try {
+        this.xhr.abort();
+      } catch (e) {
+        // Ignore abort errors
+      }
+      this.xhr = null;
     }
     this.isConnected = false;
     this.log('Disconnected');
@@ -129,47 +187,6 @@ export class StreamingService {
   // --------------------------------------------------------------------------
 
   /**
-   * Process the SSE stream
-   */
-  private async processStream(
-    body: ReadableStream<Uint8Array>,
-    callbacks: StreamingCallbacks
-  ): Promise<void> {
-    const reader = body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '';
-
-    try {
-      while (true) {
-        const { done, value } = await reader.read();
-
-        if (done) {
-          this.log('Stream complete');
-          callbacks.onComplete();
-          break;
-        }
-
-        buffer += decoder.decode(value, { stream: true });
-
-        // Process complete SSE messages
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || ''; // Keep incomplete line in buffer
-
-        for (const line of lines) {
-          this.processSSELine(line, callbacks);
-        }
-      }
-    } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') {
-        return;
-      }
-      throw error;
-    } finally {
-      reader.releaseLock();
-    }
-  }
-
-  /**
    * Process a single SSE line
    */
   private processSSELine(line: string, callbacks: StreamingCallbacks): void {
@@ -186,13 +203,14 @@ export class StreamingService {
 
       // Handle "[DONE]" marker
       if (data === '[DONE]') {
+        this.log('Received DONE marker');
         callbacks.onComplete();
         return;
       }
 
       try {
         const event = JSON.parse(data) as StreamEvent;
-        this.log('Received event', { type: event.type });
+        // this.log('Parsed event:', { type: event.type });
         callbacks.onEvent(event);
 
         // Handle error events
@@ -207,8 +225,10 @@ export class StreamingService {
           callbacks.onComplete();
         }
       } catch (parseError) {
-        this.log('Failed to parse SSE data', { data }, 'warn');
+        this.log('Failed to parse SSE data', { data, error: parseError }, 'warn');
       }
+    } else {
+        // this.log('Line did not start with data:', { line: trimmedLine });
     }
   }
 
@@ -240,57 +260,10 @@ export class StreamingService {
   }
 
   /**
-   * Handle error response
-   */
-  private async handleErrorResponse(response: Response): Promise<AgentError> {
-    let message = `HTTP ${response.status}: ${response.statusText}`;
-    let code: AgentError['code'] = 'NETWORK_ERROR';
-
-    try {
-      const body = await response.json();
-      if (body.error?.message) {
-        message = body.error.message;
-      } else if (body.message) {
-        message = body.message;
-      }
-    } catch {
-      // Ignore JSON parse errors
-    }
-
-    switch (response.status) {
-      case 401:
-        code = 'AUTHENTICATION_ERROR';
-        message = 'Invalid API key or unauthorized';
-        break;
-      case 429:
-        code = 'RATE_LIMIT_ERROR';
-        message = 'Rate limit exceeded';
-        break;
-    }
-
-    return this.createError(code, message);
-  }
-
-  /**
    * Create an error object
    */
   private createError(code: AgentError['code'], message: string): AgentError {
     return { code, message };
-  }
-
-  /**
-   * Normalize any error to AgentError
-   */
-  private normalizeError(error: unknown): AgentError {
-    if (error && typeof error === 'object' && 'code' in error && 'message' in error) {
-      return error as AgentError;
-    }
-
-    if (error instanceof Error) {
-      return this.createError('NETWORK_ERROR', error.message);
-    }
-
-    return this.createError('UNKNOWN_ERROR', 'An unexpected error occurred');
   }
 
   /**

@@ -96,7 +96,7 @@ export function AgentChat({
             <View style={styles.headerInfo}>
               <Text style={styles.headerTitle}>{headerTitle}</Text>
               <Text style={styles.headerStatus}>
-                {isTyping ? 'Typing...' : 'Online'}
+                {isTyping || isSending || isStreaming ? 'Thinking...' : 'Online'}
               </Text>
             </View>
           </View>
@@ -116,7 +116,7 @@ export function AgentChat({
       {/* Messages */}
       <MessageList
         messages={messages}
-        isTyping={isTyping && !isStreaming}
+        isTyping={isTyping || (isSending && !isStreaming)}
         streamingContent={isStreaming ? streamingContent : undefined}
         showAvatar={showAvatar}
         avatarUrl={avatarUrl}

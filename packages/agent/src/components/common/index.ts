@@ -3,9 +3,9 @@
 // ============================================================================
 
 export {
-  AssistantButton,
+  AgentButton,
   FloatingButton,
-  AssistantFAB,
+  AgentFAB,
   type FloatingButtonProps,
-  type AssistantFABProps,
-} from './AssistantButton';
+  type AgentFABProps,
+} from './AgentButton';

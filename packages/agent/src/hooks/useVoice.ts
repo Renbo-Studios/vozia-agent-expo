@@ -79,7 +79,7 @@ export interface UseVoiceReturn {
 export function useVoice(options: UseVoiceOptions = {}): UseVoiceReturn {
   const voiceServiceRef = useRef<VoiceService | null>(null);
   const recordingStartTimeRef = useRef<number>(0);
-  const durationIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const durationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Voice store state
   const state = useVoiceStore((s) => s.voiceState);
@@ -102,7 +102,6 @@ export function useVoice(options: UseVoiceOptions = {}): UseVoiceReturn {
   const updateRecordingDuration = useVoiceStore((s) => s.updateRecordingDuration);
   const addAudioLevel = useVoiceStore((s) => s.addAudioLevel);
   const clearAudioLevels = useVoiceStore((s) => s.clearAudioLevels);
-  const setPlaying = useVoiceStore((s) => s.setPlaying);
   const setTranscription = useVoiceStore((s) => s.setTranscription);
   const setResponseText = useVoiceStore((s) => s.setResponseText);
   const setError = useVoiceStore((s) => s.setError);
