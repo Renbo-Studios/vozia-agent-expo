@@ -1,6 +1,6 @@
 // ============================================================================
 // VOZIA AGENT SDK - EXAMPLE APP
-// E-Commerce Demo with Customer Service Integration
+// Examples Hub with SDK Demonstrations
 // ============================================================================
 
 import { StatusBar } from 'expo-status-bar';
@@ -23,24 +23,29 @@ import {
 } from '@vozia/agent';
 import { Ionicons } from '@expo/vector-icons';
 
+// Import screens
+import { ExamplesHome, ExampleScreen } from './screens/ExamplesHome';
+import { VoiceSDKExample } from './screens/VoiceSDKExample';
+import { ChatSDKExample } from './screens/ChatSDKExample';
+
 // ============================================================================
 // THEME & CONSTANTS
 // ============================================================================
 
 const THEME = {
-  primary: '#6366F1', // Vozia Indigo
-  secondary: '#8B5CF6', // Purple
-  background: '#F9FAFB',
-  surface: '#FFFFFF',
-  text: '#111827',
-  textSecondary: '#6B7280',
-  border: '#E5E7EB',
+  primary: '#03B19D',
+  secondary: '#00473F',
+  background: '#0A0A0A',
+  surface: '#141414',
+  text: '#FFFFFF',
+  textSecondary: '#A0A0A0',
+  border: 'rgba(255,255,255,0.1)',
   error: '#EF4444',
   success: '#10B981',
   warning: '#F59E0B',
 };
 
-// Sample Products
+// Sample Products for E-commerce demo
 const PRODUCTS = [
   {
     id: '1',
@@ -80,7 +85,7 @@ const PRODUCTS = [
   },
 ];
 
-// Local type definition (mirrors @vozia/agent types)
+// Local type definition
 interface FAQItem {
   id: string;
   question: string;
@@ -89,49 +94,25 @@ interface FAQItem {
   tags?: string[];
 }
 
-// Sample FAQs for Customer Service
+// Sample FAQs
 const SAMPLE_FAQS: FAQItem[] = [
   {
     id: '1',
     question: 'What is your return policy?',
-    answer: 'We offer a 30-day hassle-free return policy. Items must be in original condition with all packaging. Refunds are processed within 5-7 business days after we receive the item.',
+    answer: 'We offer a 30-day hassle-free return policy. Items must be in original condition with all packaging.',
     category: 'Returns',
-    tags: ['return', 'refund', 'policy'],
   },
   {
     id: '2',
     question: 'How long does shipping take?',
-    answer: 'Standard shipping takes 5-7 business days. Express shipping (2-3 days) and overnight shipping are available at checkout for an additional fee.',
+    answer: 'Standard shipping takes 5-7 business days. Express shipping (2-3 days) is available at checkout.',
     category: 'Shipping',
-    tags: ['shipping', 'delivery', 'time'],
   },
   {
     id: '3',
     question: 'Do you ship internationally?',
-    answer: 'Yes! We ship to over 100 countries worldwide. International shipping typically takes 10-14 business days. Import duties and taxes may apply.',
+    answer: 'Yes! We ship to over 100 countries worldwide. International shipping typically takes 10-14 business days.',
     category: 'Shipping',
-    tags: ['international', 'shipping', 'global'],
-  },
-  {
-    id: '4',
-    question: 'How do I track my order?',
-    answer: 'Once your order ships, you\'ll receive an email with a tracking number. You can also track your order in the app under Orders > Track Order.',
-    category: 'Orders',
-    tags: ['track', 'order', 'status'],
-  },
-  {
-    id: '5',
-    question: 'What payment methods do you accept?',
-    answer: 'We accept all major credit cards (Visa, MasterCard, American Express), PayPal, Apple Pay, and Google Pay. All transactions are secured with SSL encryption.',
-    category: 'Payment',
-    tags: ['payment', 'credit card', 'paypal'],
-  },
-  {
-    id: '6',
-    question: 'Is my product covered by warranty?',
-    answer: 'All electronics come with a 1-year manufacturer warranty. Extended warranty options are available at checkout for an additional cost.',
-    category: 'Warranty',
-    tags: ['warranty', 'coverage', 'protection'],
   },
 ];
 
@@ -150,34 +131,14 @@ const customerServiceConfig = {
   theme: {
     primaryColor: THEME.primary,
     borderRadius: 16,
-    cardBorderRadius: 12,
   },
   labels: {
     headerTitle: 'TechShop Support',
     headerSubtitle: "We're here to help",
-    welcomeMessage: 'How can we help you today?',
-    chatTitle: 'Chat with AI',
-    chatDescription: 'Get instant answers from our AI assistant',
-    faqTitle: 'Help Center',
-    faqDescription: 'Browse common questions',
-    ticketsTitle: 'Contact Us',
-    ticketsDescription: 'Submit a support request',
-    callTitle: 'Call Support',
-    callDescription: 'Speak with our team',
   },
   onTicketSubmit: async (ticket: any) => {
-    // Simulate API call
     console.log('Ticket submitted:', ticket);
     await new Promise((resolve) => setTimeout(resolve, 1500));
-    // In a real app, you'd send this to your backend
-  },
-  onFAQView: (faq: FAQItem) => {
-    console.log('FAQ viewed:', faq.question);
-    // Track FAQ views for analytics
-  },
-  onChatMessage: (message: string) => {
-    console.log('Chat message:', message);
-    // Track chat messages for analytics
   },
 };
 
@@ -204,61 +165,171 @@ export default function App() {
         theme={{
           primaryColor: THEME.primary,
         }}
-        isDark={false}
+        isDark={true}
         onReady={() => console.log('[App] Agent ready')}
         onError={(error: any) => console.error('[App] Agent error:', error)}
       >
-        {/* Customer Service Provider - enables useCustomerService hook and shows FAB */}
-        <CustomerServiceProvider
-          config={customerServiceConfig}
-          showButton={true}
-          buttonPosition="bottom-right"
-          buttonSize={56}
-        >
-          <HomeScreen />
-        </CustomerServiceProvider>
+        <AppNavigator />
       </AgentProvider>
     </SafeAreaProvider>
   );
 }
 
 // ============================================================================
-// HOME SCREEN
+// APP NAVIGATOR
 // ============================================================================
 
-function HomeScreen() {
+function AppNavigator() {
+  const [currentScreen, setCurrentScreen] = useState<ExampleScreen>('home');
+
+  const handleNavigate = useCallback((screen: ExampleScreen) => {
+    setCurrentScreen(screen);
+  }, []);
+
+  const handleBack = useCallback(() => {
+    setCurrentScreen('home');
+  }, []);
+
+  // Render based on current screen
+  switch (currentScreen) {
+    case 'voice-sdk':
+      return <VoiceSDKExample onBack={handleBack} />;
+
+    case 'chat-sdk':
+      return <ChatSDKExample onBack={handleBack} />;
+
+    case 'customer-service':
+      return (
+        <CustomerServiceProvider
+          config={customerServiceConfig}
+          showButton={true}
+          buttonPosition="bottom-right"
+          buttonSize={56}
+        >
+          <CustomerServiceDemo onBack={handleBack} />
+        </CustomerServiceProvider>
+      );
+
+    case 'ecommerce-demo':
+      return (
+        <CustomerServiceProvider
+          config={customerServiceConfig}
+          showButton={true}
+          buttonPosition="bottom-right"
+          buttonSize={56}
+        >
+          <EcommerceDemo onBack={handleBack} />
+        </CustomerServiceProvider>
+      );
+
+    default:
+      return <ExamplesHome onNavigate={handleNavigate} />;
+  }
+}
+
+// ============================================================================
+// CUSTOMER SERVICE DEMO
+// ============================================================================
+
+interface CustomerServiceDemoProps {
+  onBack: () => void;
+}
+
+function CustomerServiceDemo({ onBack }: CustomerServiceDemoProps) {
+  const insets = useSafeAreaInsets();
+  const { open } = useCustomerService();
+
+  return (
+    <View style={styles.container}>
+      <StatusBar style="light" />
+
+      {/* Header */}
+      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
+        <TouchableOpacity style={styles.backButton} onPress={onBack}>
+          <Ionicons name="arrow-back" size={24} color={THEME.text} />
+        </TouchableOpacity>
+        <View style={styles.headerTitle}>
+          <Text style={styles.headerText}>Customer Service</Text>
+          <Text style={styles.headerSubtext}>SDK Example</Text>
+        </View>
+        <View style={{ width: 40 }} />
+      </View>
+
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+      >
+        <View style={styles.demoCard}>
+          <Ionicons name="headset-outline" size={48} color={THEME.primary} />
+          <Text style={styles.demoTitle}>Customer Service Widget</Text>
+          <Text style={styles.demoDescription}>
+            Tap the floating button in the bottom right corner to open the customer service widget.
+            You can also trigger it programmatically.
+          </Text>
+          <View style={styles.demoButtons}>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => open('home')}
+            >
+              <Ionicons name="apps-outline" size={20} color="#FFFFFF" />
+              <Text style={styles.actionButtonText}>Open Home</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => open('chat')}
+            >
+              <Ionicons name="chatbubble-outline" size={20} color="#FFFFFF" />
+              <Text style={styles.actionButtonText}>Open Chat</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => open('faq')}
+            >
+              <Ionicons name="help-circle-outline" size={20} color="#FFFFFF" />
+              <Text style={styles.actionButtonText}>Open FAQ</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <View style={{ height: 100 }} />
+      </ScrollView>
+    </View>
+  );
+}
+
+// ============================================================================
+// E-COMMERCE DEMO
+// ============================================================================
+
+interface EcommerceDemoProps {
+  onBack: () => void;
+}
+
+function EcommerceDemo({ onBack }: EcommerceDemoProps) {
   const insets = useSafeAreaInsets();
   const [cartCount, setCartCount] = useState(0);
-
-  // Programmatic control of customer service (alternative to FAB)
   const { open } = useCustomerService();
 
   const handleAddToCart = useCallback((product: typeof PRODUCTS[0]) => {
     setCartCount((prev) => prev + 1);
-    Alert.alert(
-      'Added to Cart',
-      `${product.name} has been added to your cart.`,
-      [{ text: 'OK' }]
-    );
+    Alert.alert('Added to Cart', `${product.name} has been added to your cart.`);
   }, []);
-
-  const handleHelpPress = useCallback(() => {
-    // Open customer service programmatically
-    open('home');
-  }, [open]);
 
   return (
     <View style={styles.container}>
-      <StatusBar style="dark" />
+      <StatusBar style="light" />
 
       {/* Header */}
-      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
+      <View style={[styles.ecomHeader, { paddingTop: insets.top + 8 }]}>
+        <TouchableOpacity style={styles.backButton} onPress={onBack}>
+          <Ionicons name="arrow-back" size={24} color={THEME.text} />
+        </TouchableOpacity>
         <View style={styles.headerLeft}>
           <Text style={styles.logo}>TechShop</Text>
           <Text style={styles.tagline}>Premium Electronics</Text>
         </View>
         <View style={styles.headerRight}>
-          <TouchableOpacity style={styles.headerButton} onPress={handleHelpPress}>
+          <TouchableOpacity style={styles.headerButton} onPress={() => open('home')}>
             <Ionicons name="help-circle-outline" size={24} color={THEME.text} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.headerButton}>
@@ -284,7 +355,7 @@ function HomeScreen() {
       {/* Products Grid */}
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={styles.ecomScrollContent}
         showsVerticalScrollIndicator={false}
       >
         <Text style={styles.sectionTitle}>Featured Products</Text>
@@ -302,15 +373,14 @@ function HomeScreen() {
         <View style={styles.helpSection}>
           <Text style={styles.helpTitle}>Need Help?</Text>
           <Text style={styles.helpDescription}>
-            Our support team is available 24/7 to assist you with any questions.
+            Our support team is available 24/7 to assist you.
           </Text>
-          <TouchableOpacity style={styles.helpButton} onPress={handleHelpPress}>
+          <TouchableOpacity style={styles.helpButton} onPress={() => open('home')}>
             <Ionicons name="chatbubbles-outline" size={20} color="#FFFFFF" />
             <Text style={styles.helpButtonText}>Get Support</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Footer spacing for FAB */}
         <View style={{ height: 100 }} />
       </ScrollView>
     </View>
@@ -346,10 +416,7 @@ function ProductCard({ product, onAddToCart }: ProductCardProps) {
         </View>
         <View style={styles.productFooter}>
           <Text style={styles.productPrice}>${product.price.toFixed(2)}</Text>
-          <TouchableOpacity
-            style={styles.addButton}
-            onPress={onAddToCart}
-          >
+          <TouchableOpacity style={styles.addButton} onPress={onAddToCart}>
             <Ionicons name="add" size={20} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
@@ -372,22 +439,108 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: THEME.border,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: THEME.surface,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerTitle: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  headerText: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: THEME.text,
+  },
+  headerSubtext: {
+    fontSize: 12,
+    color: THEME.textSecondary,
+    marginTop: 2,
+  },
+
+  // Scroll
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    padding: 20,
+  },
+
+  // Demo card
+  demoCard: {
+    backgroundColor: THEME.surface,
+    borderRadius: 20,
+    padding: 32,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: THEME.border,
+  },
+  demoTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: THEME.text,
+    marginTop: 20,
+    marginBottom: 12,
+  },
+  demoDescription: {
+    fontSize: 15,
+    color: THEME.textSecondary,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 24,
+  },
+  demoButtons: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 12,
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: THEME.primary,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+  },
+  actionButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+
+  // E-commerce styles
+  ecomHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 16,
     paddingBottom: 12,
     backgroundColor: THEME.surface,
     borderBottomWidth: 1,
     borderBottomColor: THEME.border,
   },
-  headerLeft: {},
+  headerLeft: {
+    flex: 1,
+    marginLeft: 12,
+  },
   logo: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '700',
     color: THEME.primary,
     letterSpacing: -0.5,
   },
   tagline: {
-    fontSize: 12,
+    fontSize: 11,
     color: THEME.textSecondary,
     marginTop: -2,
   },
@@ -421,7 +574,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 
-  // Hero Banner
   heroBanner: {
     backgroundColor: THEME.primary,
     paddingVertical: 24,
@@ -454,11 +606,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
-  // Products
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
+  ecomScrollContent: {
     padding: 16,
   },
   sectionTitle: {
@@ -482,7 +630,7 @@ const styles = StyleSheet.create({
       ios: {
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.08,
+        shadowOpacity: 0.15,
         shadowRadius: 8,
       },
       android: {
@@ -533,7 +681,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
-  // Help Section
   helpSection: {
     backgroundColor: THEME.surface,
     borderRadius: 16,

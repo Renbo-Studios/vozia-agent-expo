@@ -165,8 +165,7 @@ function createStyles(theme: AgentTheme) {
       paddingVertical: theme.spacingSm,
       minHeight: 56,
       backgroundColor: theme.backgroundColor,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.borderColor,
+      // Removed borderBottomWidth
     } as ViewStyle,
 
     leftSection: {
@@ -191,7 +190,8 @@ function createStyles(theme: AgentTheme) {
       width: 40,
       height: 40,
       borderRadius: 20,
-      backgroundColor: theme.surfaceColor,
+      // Removed surfaceColor background for cleaner look, or make it very subtle
+      backgroundColor: 'transparent', 
       justifyContent: 'center',
       alignItems: 'center',
     } as ViewStyle,
@@ -202,8 +202,8 @@ function createStyles(theme: AgentTheme) {
     } as ViewStyle,
 
     logo: {
-      width: 32,
-      height: 32,
+      width: 28, // Smaller logo to match new design
+      height: 28,
       marginRight: theme.spacingSm,
     } as ImageStyle,
 
@@ -212,14 +212,14 @@ function createStyles(theme: AgentTheme) {
     } as ViewStyle,
 
     title: {
-      fontSize: theme.fontSizeLarge,
+      fontSize: 17, // iOS standard style
       fontWeight: '600',
       color: theme.textColor,
       letterSpacing: -0.3,
     } as TextStyle,
 
     subtitle: {
-      fontSize: theme.fontSizeSmall,
+      fontSize: 12,
       color: theme.textSecondaryColor,
       marginTop: 2,
     } as TextStyle,

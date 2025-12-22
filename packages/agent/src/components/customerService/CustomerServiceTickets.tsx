@@ -382,19 +382,19 @@ function createStyles(theme: AgentTheme, config: any) {
     } as ViewStyle,
 
     scrollContent: {
-      padding: theme.spacingMd,
-      paddingBottom: theme.spacingXl,
+      padding: 20,
+      paddingBottom: 40,
     } as ViewStyle,
 
     field: {
-      marginBottom: theme.spacingMd,
+      marginBottom: 20,
     } as ViewStyle,
 
     label: {
-      fontSize: theme.fontSizeMedium,
-      fontWeight: '500',
+      fontSize: 14,
+      fontWeight: '600',
       color: customTheme.textColor || theme.textColor,
-      marginBottom: theme.spacingXs,
+      marginBottom: 8,
     } as TextStyle,
 
     required: {
@@ -404,45 +404,46 @@ function createStyles(theme: AgentTheme, config: any) {
     optional: {
       color: theme.textSecondaryColor,
       fontWeight: '400',
+      fontSize: 12,
     } as TextStyle,
 
     input: {
       backgroundColor: theme.surfaceColor,
-      borderWidth: 1,
-      borderColor: theme.borderColor,
-      borderRadius: theme.inputRadius,
-      paddingHorizontal: theme.spacingMd,
-      paddingVertical: theme.spacingSm + 4,
-      fontSize: theme.fontSizeMedium,
+      borderRadius: 12,
+      paddingHorizontal: 16,
+      paddingVertical: 12, // Increased for better touch target
+      fontSize: 15, // iOS standard
       color: theme.textColor,
+      // Flat style: no border or very subtle
+      borderWidth: 1,
+      borderColor: 'transparent', // Initially transparent
     } as TextStyle,
 
     textArea: {
       minHeight: 120,
-      paddingTop: theme.spacingSm + 4,
+      paddingTop: 16,
     } as ViewStyle,
 
     priorityContainer: {
       flexDirection: 'row',
-      gap: theme.spacingSm,
+      gap: 8,
     } as ViewStyle,
 
     priorityButton: {
       flex: 1,
-      paddingVertical: theme.spacingSm,
-      paddingHorizontal: theme.spacingXs,
-      borderRadius: theme.buttonRadius,
-      borderWidth: 1,
-      borderColor: theme.borderColor,
+      paddingVertical: 10,
+      paddingHorizontal: 4,
+      borderRadius: 8,
+      backgroundColor: theme.surfaceColor, // Flat background instead of border
       alignItems: 'center',
     } as ViewStyle,
 
     priorityButtonActive: {
-      borderColor: 'transparent',
+      // Background color will be set dynamically
     } as ViewStyle,
 
     priorityText: {
-      fontSize: theme.fontSizeSmall,
+      fontSize: 12,
       color: theme.textSecondaryColor,
       fontWeight: '500',
     } as TextStyle,
@@ -454,10 +455,11 @@ function createStyles(theme: AgentTheme, config: any) {
 
     submitButton: {
       backgroundColor: customTheme.primaryColor || theme.primaryColor,
-      paddingVertical: theme.spacingMd,
-      borderRadius: customTheme.buttonBorderRadius || theme.buttonRadius,
+      paddingVertical: 16,
+      borderRadius: 24, // Pill shape
       alignItems: 'center',
-      marginTop: theme.spacingMd,
+      marginTop: 24,
+      // No shadow
     } as ViewStyle,
 
     submitButtonDisabled: {
@@ -466,7 +468,7 @@ function createStyles(theme: AgentTheme, config: any) {
 
     submitButtonText: {
       color: '#FFFFFF',
-      fontSize: theme.fontSizeMedium,
+      fontSize: 16,
       fontWeight: '600',
     } as TextStyle,
 
@@ -475,7 +477,7 @@ function createStyles(theme: AgentTheme, config: any) {
       flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
-      padding: theme.spacingXl,
+      padding: 32,
     } as ViewStyle,
 
     successContent: {
@@ -489,20 +491,21 @@ function createStyles(theme: AgentTheme, config: any) {
       backgroundColor: theme.successColor,
       justifyContent: 'center',
       alignItems: 'center',
-      marginBottom: theme.spacingLg,
+      marginBottom: 24,
     } as ViewStyle,
 
     successTitle: {
       fontSize: 20,
-      fontWeight: '600',
+      fontWeight: '700',
       color: theme.textColor,
-      marginBottom: theme.spacingSm,
+      marginBottom: 8,
     } as TextStyle,
 
     successMessage: {
-      fontSize: theme.fontSizeMedium,
+      fontSize: 16,
       color: theme.textSecondaryColor,
       textAlign: 'center',
+      lineHeight: 22,
     } as TextStyle,
   });
 }

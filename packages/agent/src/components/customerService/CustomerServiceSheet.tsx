@@ -13,10 +13,11 @@ import {
   Animated,
   PanResponder,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { useTheme } from '../ThemeProvider';
 import type { AgentTheme } from '../../types';
-import type { CustomerServiceSheetProps, CustomerServiceScreen, CustomerServiceConfig } from './types';
+import type { CustomerServiceSheetProps, CustomerServiceScreen, CustomerServiceConfig, FAQItem } from './types';
 import { DEFAULT_CONFIG, LAYOUT, ANIMATION_CONFIG, DEFAULT_LABELS } from './constants';
 import { CustomerServiceHeader } from './CustomerServiceHeader';
 import { CustomerServiceHome } from './CustomerServiceHome';
@@ -24,6 +25,7 @@ import { CustomerServiceChat } from './CustomerServiceChat';
 import { CustomerServiceFAQ } from './CustomerServiceFAQ';
 import { CustomerServiceTickets } from './CustomerServiceTickets';
 import { CustomerServiceCall } from './CustomerServiceCall';
+import { AgentClient } from '../../core/AgentClient';
 
 // ----------------------------------------------------------------------------
 // Component
@@ -43,7 +45,49 @@ export function CustomerServiceSheet({
   testID,
 }: CustomerServiceSheetProps) {
   const theme = useTheme();
-  const config = mergeConfig(userConfig);
+
+  // State for merged config (DB + user config)
+  const [mergedConfig, setMergedConfig] = useState<CustomerServiceConfig>(() => mergeConfig(userConfig));
+  const [isLoadingConfig, setIsLoadingConfig] = useState(false);
+  const configFetchedRef = useRef(false);
+
+  // Fetch config from backend and merge with user config
+  useEffect(() => {
+    if (visible && !configFetchedRef.current) {
+      configFetchedRef.current = true;
+
+      const fetchAndMergeConfig = async () => {
+        try {
+          setIsLoadingConfig(true);
+
+          if (AgentClient.hasInstance()) {
+            const dbConfig = await AgentClient.getInstance().getCustomerServiceConfig();
+
+            if (dbConfig) {
+              // Merge configs: user config overrides DB config, FAQs are combined
+              const merged = mergeConfigWithDb(dbConfig, userConfig);
+              setMergedConfig(merged);
+            }
+          }
+        } catch (error) {
+          console.warn('[CustomerServiceSheet] Failed to fetch config from backend:', error);
+        } finally {
+          setIsLoadingConfig(false);
+        }
+      };
+
+      fetchAndMergeConfig();
+    }
+  }, [visible, userConfig]);
+
+  // Reset fetch flag when sheet closes
+  useEffect(() => {
+    if (!visible) {
+      configFetchedRef.current = false;
+    }
+  }, [visible]);
+
+  const config = mergedConfig;
   const styles = createStyles(theme, config);
   const labels = { ...DEFAULT_LABELS, ...config.labels };
 
@@ -182,6 +226,7 @@ export function CustomerServiceSheet({
           <CustomerServiceHome
             config={config}
             onNavigate={navigateTo}
+            onClose={handleClose}
             testID={`${testID}-home`}
           />
         );
@@ -257,8 +302,8 @@ export function CustomerServiceSheet({
           <View style={styles.handle} />
         </View>
 
-        {/* Header (only for home screen) */}
-        {currentScreen === 'home' && (
+        {/* Header (hidden for home screen as it has custom header) */}
+        {currentScreen !== 'home' && (
           <CustomerServiceHeader
             title={getHeaderTitle()}
             subtitle={labels.headerSubtitle}
@@ -296,6 +341,95 @@ function mergeConfig(userConfig?: CustomerServiceConfig): CustomerServiceConfig 
       ...userConfig?.labels,
     },
   };
+}
+
+/**
+ * Merge database config with user config
+ * - User config overrides DB config for most fields
+ * - FAQs are combined (DB FAQs + user FAQs, avoiding duplicates)
+ */
+function mergeConfigWithDb(
+  dbConfig: Record<string, any>,
+  userConfig?: CustomerServiceConfig
+): CustomerServiceConfig {
+  // Start with defaults
+  const baseConfig = { ...DEFAULT_CONFIG };
+
+  // Apply DB config
+  const dbMerged = {
+    ...baseConfig,
+    ...dbConfig,
+    theme: {
+      ...baseConfig.theme,
+      ...dbConfig.theme,
+    },
+    labels: {
+      ...DEFAULT_LABELS,
+      ...dbConfig.labels,
+    },
+  };
+
+  // If no user config, return DB merged config
+  if (!userConfig) {
+    return dbMerged;
+  }
+
+  // Merge FAQs: combine DB FAQs with user FAQs (avoid duplicates by question)
+  const dbFaqs = extractFaqs(dbConfig.faqs);
+  const userFaqs = extractFaqs(userConfig.faqs);
+
+  // Use question text as key to avoid duplicates (case-insensitive)
+  const faqMap = new Map<string, FAQItem>();
+
+  // Add DB FAQs first
+  dbFaqs.forEach((faq) => {
+    faqMap.set(faq.question.toLowerCase().trim(), faq);
+  });
+
+  // Add/override with user FAQs
+  userFaqs.forEach((faq) => {
+    faqMap.set(faq.question.toLowerCase().trim(), faq);
+  });
+
+  const combinedFaqs = Array.from(faqMap.values());
+
+  // User config overrides DB config for other fields
+  return {
+    ...dbMerged,
+    ...userConfig,
+    // Combined FAQs
+    faqs: combinedFaqs,
+    // Deep merge theme
+    theme: {
+      ...dbMerged.theme,
+      ...userConfig.theme,
+    },
+    // Deep merge labels
+    labels: {
+      ...dbMerged.labels,
+      ...userConfig.labels,
+    },
+  };
+}
+
+/**
+ * Extract FAQs array from various source formats
+ */
+function extractFaqs(faqs: any): FAQItem[] {
+  if (!faqs) return [];
+
+  // If it's already an array, return it
+  if (Array.isArray(faqs)) {
+    return faqs.filter((f): f is FAQItem => f && typeof f.question === 'string' && typeof f.answer === 'string');
+  }
+
+  // If it's a FAQSource object with type 'static'
+  if (faqs.type === 'static' && Array.isArray(faqs.data)) {
+    return faqs.data.filter((f: any): f is FAQItem => f && typeof f.question === 'string' && typeof f.answer === 'string');
+  }
+
+  // For API sources, return empty (will be fetched separately)
+  return [];
 }
 
 // ----------------------------------------------------------------------------

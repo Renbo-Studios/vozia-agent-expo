@@ -234,12 +234,16 @@ function formatTime(date: Date): string {
 // Styles
 // ----------------------------------------------------------------------------
 
+// ----------------------------------------------------------------------------
+// Styles
+// ----------------------------------------------------------------------------
+
 function createStyles(theme: AgentTheme) {
   return StyleSheet.create({
     container: {
       flexDirection: 'row',
-      paddingHorizontal: theme.spacingMd,
-      paddingVertical: theme.spacingXs,
+      paddingHorizontal: 16,
+      paddingVertical: 4, // Tighter vertical spacing
       alignItems: 'flex-end',
     } as ViewStyle,
 
@@ -252,13 +256,14 @@ function createStyles(theme: AgentTheme) {
     } as ViewStyle,
 
     avatarContainer: {
-      marginRight: theme.spacingSm,
+      marginRight: 8,
+      paddingBottom: 4, // Align with bubble bottom
     } as ViewStyle,
 
     avatar: {
-      width: 32,
-      height: 32,
-      borderRadius: 16,
+      width: 28, // Smaller avatar
+      height: 28,
+      borderRadius: 14,
       backgroundColor: theme.primaryColor,
       justifyContent: 'center',
       alignItems: 'center',
@@ -266,52 +271,51 @@ function createStyles(theme: AgentTheme) {
 
     avatarText: {
       color: '#FFFFFF',
-      fontSize: 14,
+      fontSize: 12,
       fontWeight: '600',
     } as TextStyle,
 
     avatarSpacer: {
-      width: 32 + theme.spacingSm,
+      width: 28 + 8,
     } as ViewStyle,
 
     bubble: {
       maxWidth: '75%',
-      paddingHorizontal: theme.spacingMd,
-      paddingVertical: theme.spacingSm,
-      borderRadius: theme.bubbleRadius,
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      borderRadius: 18, // Uniform roundness
     } as ViewStyle,
 
     userBubble: {
-      backgroundColor: theme.userBubbleColor,
-      borderBottomRightRadius: 4,
+      backgroundColor: theme.primaryColor, // Use primary for user
+      borderBottomRightRadius: 4, // Keep slight indicator of direction
     } as ViewStyle,
 
     assistantBubble: {
-      backgroundColor: theme.agentBubbleColor,
+      backgroundColor: theme.surfaceColor, // Flat surface color for agent
       borderBottomLeftRadius: 4,
     } as ViewStyle,
 
     messageText: {
-      fontSize: theme.fontSizeMedium,
-      lineHeight: theme.fontSizeMedium * 1.5,
+      fontSize: 15,
+      lineHeight: 22,
     } as TextStyle,
 
     userText: {
-      color: theme.userBubbleTextColor,
+      color: '#FFFFFF', // Assuming primary is dark enough, else theme.userBubbleTextColor
     } as TextStyle,
 
     assistantText: {
-      color: theme.agentBubbleTextColor,
+      color: theme.textColor,
     } as TextStyle,
 
     timestamp: {
-      fontSize: theme.fontSizeSmall,
-      marginTop: theme.spacingXs,
+      fontSize: 11,
+      marginTop: 4,
     } as TextStyle,
 
     userTimestamp: {
-      color: theme.userBubbleTextColor,
-      opacity: 0.7,
+      color: 'rgba(255, 255, 255, 0.7)',
       textAlign: 'right',
     } as TextStyle,
 
@@ -320,14 +324,13 @@ function createStyles(theme: AgentTheme) {
     } as TextStyle,
 
     status: {
-      fontSize: theme.fontSizeSmall,
-      color: theme.userBubbleTextColor,
-      opacity: 0.7,
+      fontSize: 10,
+      color: 'rgba(255, 255, 255, 0.7)',
       marginTop: 2,
     } as TextStyle,
 
     statusError: {
-      fontSize: theme.fontSizeSmall,
+      fontSize: 10,
       color: theme.errorColor,
       marginTop: 2,
     } as TextStyle,
@@ -337,7 +340,8 @@ function createStyles(theme: AgentTheme) {
     } as TextStyle,
 
     typingBubble: {
-      paddingVertical: theme.spacingMd,
+      paddingVertical: 12,
+      paddingHorizontal: 16,
     } as ViewStyle,
 
     typingDots: {
@@ -347,23 +351,15 @@ function createStyles(theme: AgentTheme) {
     } as ViewStyle,
 
     dot: {
-      width: 8,
-      height: 8,
-      borderRadius: 4,
+      width: 6,
+      height: 6,
+      borderRadius: 3,
       backgroundColor: theme.textSecondaryColor,
       opacity: 0.4,
     } as ViewStyle,
 
-    dot1: {
-      // Animation would be applied here
-    } as ViewStyle,
-
-    dot2: {
-      // Animation would be applied here
-    } as ViewStyle,
-
-    dot3: {
-      // Animation would be applied here
-    } as ViewStyle,
+    dot1: {},
+    dot2: {},
+    dot3: {},
   });
 }

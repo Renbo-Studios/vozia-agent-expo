@@ -268,6 +268,10 @@ function CloseIcon({ color, size = 24 }: IconProps) {
 // Styles
 // ----------------------------------------------------------------------------
 
+// ----------------------------------------------------------------------------
+// Styles
+// ----------------------------------------------------------------------------
+
 function createStyles(theme: AgentTheme) {
   return StyleSheet.create({
     container: {
@@ -283,10 +287,9 @@ function createStyles(theme: AgentTheme) {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      paddingHorizontal: theme.spacingMd,
-      paddingVertical: theme.spacingSm,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.borderColor,
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      // Removed borderBottomWidth
       backgroundColor: theme.surfaceColor,
     } as ViewStyle,
 
@@ -297,18 +300,18 @@ function createStyles(theme: AgentTheme) {
     } as ViewStyle,
 
     headerAvatar: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
+      width: 36,
+      height: 36,
+      borderRadius: 18,
       backgroundColor: theme.primaryColor,
       justifyContent: 'center',
       alignItems: 'center',
-      marginRight: theme.spacingSm,
+      marginRight: 10,
     } as ViewStyle,
 
     headerAvatarText: {
       color: '#FFFFFF',
-      fontSize: 16,
+      fontSize: 14,
       fontWeight: '600',
     } as TextStyle,
 
@@ -317,13 +320,13 @@ function createStyles(theme: AgentTheme) {
     } as ViewStyle,
 
     headerTitle: {
-      fontSize: theme.fontSizeLarge,
+      fontSize: 16,
       fontWeight: '600',
       color: theme.textColor,
     } as TextStyle,
 
     headerStatus: {
-      fontSize: theme.fontSizeSmall,
+      fontSize: 12,
       color: theme.textSecondaryColor,
     } as TextStyle,
 
@@ -341,16 +344,16 @@ function createStyles(theme: AgentTheme) {
       right: 16,
       left: 16,
       maxHeight: '70%',
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.15,
-      shadowRadius: 12,
-      elevation: 8,
+      // Removed shadow/elevation for flat look
+      // Use border instead if needed for separation
+      borderWidth: 1,
+      borderColor: theme.borderColor,
+      borderRadius: 24,
     } as ViewStyle,
 
     bubbleCard: {
       flex: 1,
-      borderRadius: theme.cardRadius,
+      borderRadius: 24,
       overflow: 'hidden',
       backgroundColor: theme.backgroundColor,
       maxHeight: 500,

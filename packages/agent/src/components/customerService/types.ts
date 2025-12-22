@@ -292,6 +292,7 @@ export interface CustomerServiceHeaderProps {
 export interface CustomerServiceHomeProps {
   config: CustomerServiceConfig;
   onNavigate: (screen: CustomerServiceScreen) => void;
+  onClose?: () => void;
   testID?: string;
 }
 

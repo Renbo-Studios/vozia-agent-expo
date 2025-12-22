@@ -544,6 +544,26 @@ export class AgentClient {
   }
 
   // --------------------------------------------------------------------------
+  // Customer Service Methods
+  // --------------------------------------------------------------------------
+
+  /**
+   * Get customer service configuration from the backend
+   */
+  async getCustomerServiceConfig(): Promise<Record<string, any> | null> {
+    try {
+      this.log('Fetching customer service config');
+      const response = await this.httpClient.get<{ config: Record<string, any> | null }>(
+        API_ENDPOINTS.AGENT_CUSTOMER_SERVICE_CONFIG(this.config.agentId)
+      );
+      return response.config;
+    } catch (error) {
+      this.log('Failed to fetch customer service config', { error }, 'warn');
+      return null;
+    }
+  }
+
+  // --------------------------------------------------------------------------
   // Theme Methods
   // --------------------------------------------------------------------------
 

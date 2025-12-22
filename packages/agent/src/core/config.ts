@@ -242,6 +242,7 @@ export const API_ENDPOINTS = {
     `/api/agents/${agentId}/sessions/${sessionId}`,
   AGENT_SESSION_MESSAGE: (agentId: string, sessionId: string) =>
     `/api/agents/${agentId}/sessions/${sessionId}/message`,
+  AGENT_CUSTOMER_SERVICE_CONFIG: (id: string) => `/api/agents/${id}/customer-service-config`,
 
   // Voice
   VOICE_TOKEN: '/api/livekit/token',

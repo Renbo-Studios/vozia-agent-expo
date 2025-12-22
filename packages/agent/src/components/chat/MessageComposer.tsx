@@ -228,35 +228,36 @@ function AttachmentIcon({ color, size = 20 }: IconProps) {
 // Styles
 // ----------------------------------------------------------------------------
 
+// ----------------------------------------------------------------------------
+// Styles
+// ----------------------------------------------------------------------------
+
 function createStyles(theme: AgentTheme) {
   return StyleSheet.create({
     container: {
       flexDirection: 'row',
       alignItems: 'flex-end',
-      paddingHorizontal: theme.spacingMd,
-      paddingVertical: theme.spacingSm,
+      paddingHorizontal: 16,
+      paddingVertical: 12,
       backgroundColor: theme.backgroundColor,
-      borderTopWidth: 1,
-      borderTopColor: theme.borderColor,
-      marginBottom: 20,
+      // Removed borderTop
     } as ViewStyle,
 
     inputContainer: {
       flex: 1,
       backgroundColor: theme.surfaceColor,
-      borderRadius: theme.inputRadius,
-      borderWidth: 1,
-      borderColor: theme.borderColor,
-      marginHorizontal: theme.spacingSm,
+      borderRadius: 20,
+      marginHorizontal: 8,
       minHeight: 40,
       maxHeight: 120,
       justifyContent: 'center',
+      // No border
     } as ViewStyle,
 
     input: {
-      paddingHorizontal: theme.spacingMd,
-      paddingVertical: theme.spacingSm,
-      fontSize: theme.fontSizeMedium,
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      fontSize: 16,
       color: theme.textColor,
       maxHeight: 100,
     } as TextStyle,
@@ -282,6 +283,7 @@ function createStyles(theme: AgentTheme) {
 
     sendButtonDisabled: {
       backgroundColor: theme.borderColor,
+      opacity: 0.5,
     } as ViewStyle,
   });
 }

@@ -340,6 +340,10 @@ function ChevronDownIcon({ color, size = 24 }: IconProps) {
 // Styles
 // ----------------------------------------------------------------------------
 
+// ----------------------------------------------------------------------------
+// Styles
+// ----------------------------------------------------------------------------
+
 function createStyles(theme: AgentTheme, config: any) {
   const customTheme = config.theme || {};
 
@@ -350,27 +354,25 @@ function createStyles(theme: AgentTheme, config: any) {
     } as ViewStyle,
 
     searchContainer: {
-      padding: theme.spacingMd,
+      padding: 16,
       backgroundColor: customTheme.backgroundColor || theme.backgroundColor,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.borderColor,
+      // Removed borderBottom
     } as ViewStyle,
 
     searchInputContainer: {
       flexDirection: 'row',
       alignItems: 'center',
       backgroundColor: theme.surfaceColor,
-      borderRadius: theme.inputRadius,
-      paddingHorizontal: theme.spacingMd,
-      height: 44,
-      borderWidth: 1,
-      borderColor: theme.borderColor,
+      borderRadius: 12,
+      paddingHorizontal: 12,
+      height: 48, // Taller touch target
+      // No border
     } as ViewStyle,
 
     searchInput: {
       flex: 1,
-      marginLeft: theme.spacingSm,
-      fontSize: theme.fontSizeMedium,
+      marginLeft: 12,
+      fontSize: 16,
       color: theme.textColor,
     } as TextStyle,
 
@@ -379,33 +381,35 @@ function createStyles(theme: AgentTheme, config: any) {
     } as ViewStyle,
 
     scrollContent: {
-      padding: theme.spacingMd,
+      paddingHorizontal: 16,
+      paddingBottom: 40,
     } as ViewStyle,
 
     emptyState: {
       flex: 1,
       alignItems: 'center',
       justifyContent: 'center',
-      paddingVertical: theme.spacingXl * 2,
+      paddingVertical: 60,
     } as ViewStyle,
 
     emptyText: {
-      fontSize: theme.fontSizeMedium,
+      fontSize: 15,
       color: theme.textSecondaryColor,
       textAlign: 'center',
     } as TextStyle,
 
     categorySection: {
-      marginBottom: theme.spacingLg,
+      marginBottom: 24,
     } as ViewStyle,
 
     categoryTitle: {
-      fontSize: theme.fontSizeSmall,
-      fontWeight: '600',
-      color: theme.textSecondaryColor,
+      fontSize: 13,
+      fontWeight: '700',
+      color: theme.textColor, // Stronger contrast
       textTransform: 'uppercase',
       letterSpacing: 0.5,
-      marginBottom: theme.spacingSm,
+      marginBottom: 12,
+      marginLeft: 4,
     } as TextStyle,
   });
 }
@@ -416,41 +420,36 @@ function createItemStyles(theme: AgentTheme, config: any) {
   return StyleSheet.create({
     itemContainer: {
       backgroundColor: customTheme.cardBackgroundColor || theme.surfaceColor,
-      borderRadius: theme.cardRadius,
-      marginBottom: theme.spacingSm,
-      borderWidth: 1,
-      borderColor: customTheme.cardBorderColor || theme.borderColor,
-      overflow: 'hidden',
+      borderRadius: 12,
+      marginBottom: 8,
+      // Flat style: no border
     } as ViewStyle,
 
     itemHeader: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      padding: theme.spacingMd,
+      padding: 16,
     } as ViewStyle,
 
     itemQuestion: {
       flex: 1,
-      fontSize: theme.fontSizeMedium,
+      fontSize: 15,
       fontWeight: '500',
       color: customTheme.textColor || theme.textColor,
-      marginRight: theme.spacingSm,
+      marginRight: 12,
     } as TextStyle,
 
     itemAnswer: {
-      paddingHorizontal: theme.spacingMd,
-      paddingBottom: theme.spacingMd,
-      borderTopWidth: 1,
-      borderTopColor: theme.borderColor,
-      backgroundColor: theme.backgroundColor,
+      paddingHorizontal: 16,
+      paddingBottom: 16,
+      // No top border, just whitespace
     } as ViewStyle,
 
     itemAnswerText: {
-      fontSize: theme.fontSizeMedium,
+      fontSize: 15,
       color: customTheme.textSecondaryColor || theme.textSecondaryColor,
-      lineHeight: theme.fontSizeMedium * 1.6,
-      paddingTop: theme.spacingMd,
+      lineHeight: 24,
     } as TextStyle,
   });
 }
