@@ -17,3 +17,17 @@ export {
   type UseAgentButtonOptions,
   type UseAgentButtonReturn,
 } from './useAgentButton';
+
+// Alias for backwards compatibility
+export { useAgentButton as useAssistantButton } from './useAgentButton';
+
+// Customer Service
+export { useCustomerService } from './useCustomerService';
+
+// Re-export types from customerService
+export type {
+  UseCustomerServiceOptions,
+  UseCustomerServiceReturn,
+  CustomerServiceConfig,
+  CustomerServiceScreen,
+} from '../components/customerService/types';

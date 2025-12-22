@@ -10,8 +10,6 @@ import {
   StyleSheet,
   ViewStyle,
   TextStyle,
-  Platform,
-  KeyboardAvoidingView,
 } from 'react-native';
 import { useTheme } from '../ThemeProvider';
 import type { AgentTheme } from '../../types';
@@ -93,71 +91,66 @@ export function MessageComposer({
   }, [canSend, handleSend]);
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
-    >
-      <View style={styles.container} testID={testID}>
-        {/* Attachment button */}
-        {enableAttachments && (
-          <TouchableOpacity
-            style={styles.iconButton}
-            onPress={onAttachmentPress}
-            disabled={disabled}
-            testID={`${testID}-attachment`}
-          >
-            <AttachmentIcon color={theme.textSecondaryColor} />
-          </TouchableOpacity>
-        )}
+    <View style={styles.container} testID={testID}>
+      {/* Attachment button */}
+      {enableAttachments && (
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={onAttachmentPress}
+          disabled={disabled}
+          testID={`${testID}-attachment`}
+        >
+          <AttachmentIcon color={theme.textSecondaryColor} />
+        </TouchableOpacity>
+      )}
 
-        {/* Text input */}
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.input}
-            value={value}
-            onChangeText={handleChangeText}
-            onSubmitEditing={handleSubmitEditing}
-            placeholder={placeholder}
-            placeholderTextColor={theme.textSecondaryColor}
-            editable={!disabled}
-            maxLength={maxLength}
-            multiline
-            numberOfLines={4}
-            textAlignVertical="center"
-            returnKeyType="send"
-            blurOnSubmit={false}
-            testID={`${testID}-input`}
-          />
-        </View>
-
-        {/* Voice button (when no text) */}
-        {enableVoice && value.length === 0 && (
-          <TouchableOpacity
-            style={styles.iconButton}
-            onPress={onVoicePress}
-            disabled={disabled}
-            testID={`${testID}-voice`}
-          >
-            <MicIcon color={theme.textSecondaryColor} />
-          </TouchableOpacity>
-        )}
-
-        {/* Send button (when has text) */}
-        {value.length > 0 && (
-          <TouchableOpacity
-            style={[
-              styles.sendButton,
-              canSend ? styles.sendButtonActive : styles.sendButtonDisabled,
-            ]}
-            onPress={handleSend}
-            disabled={!canSend}
-            testID={`${testID}-send`}
-          >
-            <SendIcon color={canSend ? '#FFFFFF' : theme.textSecondaryColor} />
-          </TouchableOpacity>
-        )}
+      {/* Text input */}
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          value={value}
+          onChangeText={handleChangeText}
+          onSubmitEditing={handleSubmitEditing}
+          placeholder={placeholder}
+          placeholderTextColor={theme.textSecondaryColor}
+          editable={!disabled}
+          maxLength={maxLength}
+          multiline
+          numberOfLines={4}
+          textAlignVertical="center"
+          returnKeyType="send"
+          blurOnSubmit={false}
+          testID={`${testID}-input`}
+        />
       </View>
-    </KeyboardAvoidingView>
+
+      {/* Voice button (when no text) */}
+      {enableVoice && value.length === 0 && (
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={onVoicePress}
+          disabled={disabled}
+          testID={`${testID}-voice`}
+        >
+          <MicIcon color={theme.textSecondaryColor} />
+        </TouchableOpacity>
+      )}
+
+      {/* Send button (when has text) */}
+      {value.length > 0 && (
+        <TouchableOpacity
+          style={[
+            styles.sendButton,
+            canSend ? styles.sendButtonActive : styles.sendButtonDisabled,
+          ]}
+          onPress={handleSend}
+          disabled={!canSend}
+          testID={`${testID}-send`}
+        >
+          <SendIcon color={canSend ? '#FFFFFF' : theme.textSecondaryColor} />
+        </TouchableOpacity>
+      )}
+    </View>
   );
 }
 
@@ -245,6 +238,7 @@ function createStyles(theme: AgentTheme) {
       backgroundColor: theme.backgroundColor,
       borderTopWidth: 1,
       borderTopColor: theme.borderColor,
+      marginBottom: 20,
     } as ViewStyle,
 
     inputContainer: {

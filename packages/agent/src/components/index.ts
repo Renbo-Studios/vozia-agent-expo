@@ -56,3 +56,27 @@ export {
   type SupportScreenProps,
   type TicketListProps,
 } from './support';
+
+// Customer Service components
+export {
+  CustomerServiceButton,
+  CustomerServiceSheet,
+  CustomerServiceProvider,
+  CustomerServiceHome,
+  CustomerServiceChat,
+  CustomerServiceFAQ,
+  CustomerServiceTickets,
+  CustomerServiceCall,
+  CustomerServiceHeader,
+  DEFAULT_LABELS as CUSTOMER_SERVICE_DEFAULT_LABELS,
+  SAMPLE_FAQS,
+  type CustomerServiceConfig,
+  type CustomerServiceButtonProps,
+  type CustomerServiceSheetProps,
+  type CustomerServiceScreen,
+  type CustomerServiceLabels,
+  type CustomerServiceTheme,
+  type FAQItem,
+  type FAQSource,
+  type CustomerServiceTicketData,
+} from './customerService';

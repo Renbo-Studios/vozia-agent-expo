@@ -613,6 +613,8 @@ export interface AgentChatProps extends BaseComponentProps {
   onSendMessage?: (message: string) => void;
   /** Called when session closes */
   onClose?: () => void;
+  /** Disable keyboard handling (when parent handles it) */
+  disableKeyboardHandling?: boolean;
 }
 
 /**

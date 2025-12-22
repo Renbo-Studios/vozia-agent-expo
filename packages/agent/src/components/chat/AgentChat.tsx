@@ -2,7 +2,7 @@
 // VOZIA AGENT SDK - AGENT CHAT COMPONENT
 // ============================================================================
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,9 @@ import {
   StyleSheet,
   ViewStyle,
   TextStyle,
-  SafeAreaView,
+  Keyboard,
+  Platform,
+  Animated,
 } from 'react-native';
 import { useTheme } from '../ThemeProvider';
 import { MessageList } from './MessageList';
@@ -49,6 +51,7 @@ export function AgentChat({
   onClose,
   style,
   testID,
+  disableKeyboardHandling = false,
 }: AgentChatProps) {
   const theme = useTheme();
   const styles = createStyles(theme);
@@ -65,6 +68,38 @@ export function AgentChat({
   } = useChat({
     greeting: initialMessage,
   });
+
+  // Keyboard handling
+  const [keyboardHeight] = useState(new Animated.Value(0));
+
+  useEffect(() => {
+    // Skip keyboard handling if parent is handling it
+    if (disableKeyboardHandling) return;
+
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+    const showSubscription = Keyboard.addListener(showEvent, (e) => {
+      Animated.timing(keyboardHeight, {
+        toValue: e.endCoordinates.height,
+        duration: Platform.OS === 'ios' ? e.duration : 250,
+        useNativeDriver: false,
+      }).start();
+    });
+
+    const hideSubscription = Keyboard.addListener(hideEvent, (e) => {
+      Animated.timing(keyboardHeight, {
+        toValue: 0,
+        duration: Platform.OS === 'ios' ? e.duration : 250,
+        useNativeDriver: false,
+      }).start();
+    });
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, [keyboardHeight, disableKeyboardHandling]);
 
   // Handle send
   const handleSend = useCallback(
@@ -83,7 +118,7 @@ export function AgentChat({
   }, []);
 
   return (
-    <SafeAreaView style={[styles.container, style]} testID={testID}>
+    <View style={[styles.container, style]} testID={testID}>
       {/* Header */}
       {showHeader && (
         <View style={styles.header}>
@@ -113,29 +148,32 @@ export function AgentChat({
         </View>
       )}
 
-      {/* Messages */}
-      <MessageList
-        messages={messages}
-        isTyping={isTyping || (isSending && !isStreaming)}
-        streamingContent={isStreaming ? streamingContent : undefined}
-        showAvatar={showAvatar}
-        avatarUrl={avatarUrl}
-        testID={`${testID}-messages`}
-      />
+      {/* Content area that shrinks when keyboard opens */}
+      <Animated.View style={[styles.contentArea, { paddingBottom: keyboardHeight }]}>
+        {/* Messages */}
+        <MessageList
+          messages={messages}
+          isTyping={isTyping || (isSending && !isStreaming)}
+          streamingContent={isStreaming ? streamingContent : undefined}
+          showAvatar={showAvatar}
+          avatarUrl={avatarUrl}
+          testID={`${testID}-messages`}
+        />
 
-      {/* Composer */}
-      <MessageComposer
-        value={inputText}
-        onChangeText={setInputText}
-        onSend={handleSend}
-        onVoicePress={handleVoicePress}
-        placeholder={placeholder}
-        disabled={isSending || isStreaming}
-        enableVoice={enableVoice}
-        enableAttachments={enableAttachments}
-        testID={`${testID}-composer`}
-      />
-    </SafeAreaView>
+        {/* Composer */}
+        <MessageComposer
+          value={inputText}
+          onChangeText={setInputText}
+          onSend={handleSend}
+          onVoicePress={handleVoicePress}
+          placeholder={placeholder}
+          disabled={isSending || isStreaming}
+          enableVoice={enableVoice}
+          enableAttachments={enableAttachments}
+          testID={`${testID}-composer`}
+        />
+      </Animated.View>
+    </View>
   );
 }
 
@@ -235,6 +273,10 @@ function createStyles(theme: AgentTheme) {
     container: {
       flex: 1,
       backgroundColor: theme.backgroundColor,
+    } as ViewStyle,
+
+    contentArea: {
+      flex: 1,
     } as ViewStyle,
 
     header: {

@@ -125,6 +125,7 @@ export {
   useVoice,
   useTools,
   useAssistantButton,
+  useCustomerService,
   getCurrentTimeTool,
   getDeviceInfoTool,
   type UseAgentOptions,
@@ -137,6 +138,8 @@ export {
   type UseToolsReturn,
   type UseAssistantButtonOptions,
   type UseAssistantButtonReturn,
+  type UseCustomerServiceOptions,
+  type UseCustomerServiceReturn,
 } from './hooks';
 
 // ----------------------------------------------------------------------------
@@ -177,6 +180,19 @@ export {
   SupportScreen,
   TicketList,
 
+  // Customer Service
+  CustomerServiceButton,
+  CustomerServiceSheet,
+  CustomerServiceProvider,
+  CustomerServiceHome,
+  CustomerServiceChat,
+  CustomerServiceFAQ,
+  CustomerServiceTickets,
+  CustomerServiceCall,
+  CustomerServiceHeader,
+  CUSTOMER_SERVICE_DEFAULT_LABELS,
+  SAMPLE_FAQS,
+
   // Theme utilities
   createThemedStyles,
   getContrastColor,
@@ -203,6 +219,17 @@ export {
   type AssistantFABProps,
   type SupportScreenProps,
   type TicketListProps,
+
+  // Customer Service types
+  type CustomerServiceConfig,
+  type CustomerServiceButtonProps,
+  type CustomerServiceSheetProps,
+  type CustomerServiceScreen,
+  type CustomerServiceLabels,
+  type CustomerServiceTheme,
+  type FAQItem,
+  type FAQSource,
+  type CustomerServiceTicketData,
 } from './components';
 
 // ----------------------------------------------------------------------------
