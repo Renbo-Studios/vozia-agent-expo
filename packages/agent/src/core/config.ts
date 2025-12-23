@@ -11,7 +11,7 @@ import type { AgentConfig, AgentFeatures, AgentTheme } from '../types';
 /**
  * Default API base URL
  */
-export const DEFAULT_BASE_URL = 'https://api.vozia.ai';
+export const DEFAULT_BASE_URL = 'https://vsa.renbostudios.com';
 
 /**
  * Default feature flags

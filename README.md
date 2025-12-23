@@ -42,8 +42,7 @@ export default function App() {
   return (
     <AgentProvider
       config={{
-        orgId: 'your-org-id',
-        assistantId: 'your-assistant-id',
+        agentId: 'your-agent-id',
         apiKey: 'your-api-key',
       }}
       features={{
@@ -273,11 +272,13 @@ Customize the appearance with the theme prop:
 
 ### AgentConfig
 
+### AgentConfig
+
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
-| `orgId` | string | Yes | Organization ID |
-| `assistantId` | string | Yes | Assistant/Agent ID |
+| `agentId` | string | Yes | Agent/Assistant ID |
 | `apiKey` | string | Yes | API key |
+| `orgId` | string | No | Organization ID |
 | `baseUrl` | string | No | Custom API URL |
 | `userId` | string | No | End user ID |
 | `userMetadata` | object | No | Additional user data |
