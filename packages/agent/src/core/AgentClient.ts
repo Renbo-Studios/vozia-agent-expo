@@ -52,6 +52,8 @@ export class AgentClient {
   private currentSessionId: string | null = null;
   private connectionStatus: ConnectionStatus = 'disconnected';
   private debug: boolean;
+  private cachedCustomerServiceConfig: Record<string, any> | null = null;
+  private customerServiceConfigLoaded: boolean = false;
 
   // Singleton instance
   private static instance: AgentClient | null = null;
@@ -525,11 +527,30 @@ export class AgentClient {
       this.connectionStatus = 'connected';
       this.emit({ type: 'connected' });
       this.log('Connected successfully');
+
+      // Preload customer service config in background (don't block connection)
+      this.preloadCustomerServiceConfig();
     } catch (error) {
       this.connectionStatus = 'error';
       const agentError = this.normalizeError(error);
       this.emit({ type: 'error', error: agentError });
       throw agentError;
+    }
+  }
+
+  /**
+   * Preload customer service config in background
+   */
+  private async preloadCustomerServiceConfig(): Promise<void> {
+    try {
+      this.log('Preloading customer service config');
+      const config = await this.getCustomerServiceConfig();
+      this.cachedCustomerServiceConfig = config;
+      this.customerServiceConfigLoaded = true;
+      this.log('Customer service config preloaded', { hasConfig: !!config });
+    } catch (error) {
+      this.log('Failed to preload customer service config', { error }, 'warn');
+      this.customerServiceConfigLoaded = true; // Mark as loaded even on error to prevent retries
     }
   }
 
@@ -548,19 +569,46 @@ export class AgentClient {
   // --------------------------------------------------------------------------
 
   /**
-   * Get customer service configuration from the backend
+   * Get customer service configuration from the backend (or cache)
+   * @param forceRefresh - If true, fetches from backend even if cached
    */
-  async getCustomerServiceConfig(): Promise<Record<string, any> | null> {
+  async getCustomerServiceConfig(forceRefresh = false): Promise<Record<string, any> | null> {
+    // Return cached config if available and not forcing refresh
+    if (!forceRefresh && this.customerServiceConfigLoaded && this.cachedCustomerServiceConfig !== undefined) {
+      this.log('Returning cached customer service config');
+      return this.cachedCustomerServiceConfig;
+    }
+
     try {
-      this.log('Fetching customer service config');
+      this.log('Fetching customer service config from backend');
       const response = await this.httpClient.get<{ config: Record<string, any> | null }>(
         API_ENDPOINTS.AGENT_CUSTOMER_SERVICE_CONFIG(this.config.agentId)
       );
+
+      // Update cache
+      this.cachedCustomerServiceConfig = response.config;
+      this.customerServiceConfigLoaded = true;
+
       return response.config;
     } catch (error) {
       this.log('Failed to fetch customer service config', { error }, 'warn');
       return null;
     }
+  }
+
+  /**
+   * Get cached customer service config (sync, returns immediately)
+   * Returns null if not yet loaded
+   */
+  getCachedCustomerServiceConfig(): Record<string, any> | null {
+    return this.cachedCustomerServiceConfig;
+  }
+
+  /**
+   * Check if customer service config has been loaded
+   */
+  isCustomerServiceConfigLoaded(): boolean {
+    return this.customerServiceConfigLoaded;
   }
 
   // --------------------------------------------------------------------------

@@ -47,27 +47,47 @@ export function CustomerServiceSheet({
   const theme = useTheme();
 
   // State for merged config (DB + user config)
-  const [mergedConfig, setMergedConfig] = useState<CustomerServiceConfig>(() => mergeConfig(userConfig));
+  const [mergedConfig, setMergedConfig] = useState<CustomerServiceConfig>(() => {
+    // Try to use cached config immediately on mount
+    if (AgentClient.hasInstance()) {
+      const cachedDbConfig = AgentClient.getInstance().getCachedCustomerServiceConfig();
+      if (cachedDbConfig) {
+        return mergeConfigWithDb(cachedDbConfig, userConfig);
+      }
+    }
+    return mergeConfig(userConfig);
+  });
   const [isLoadingConfig, setIsLoadingConfig] = useState(false);
   const configFetchedRef = useRef(false);
 
-  // Fetch config from backend and merge with user config
+  // Fetch config from backend and merge with user config (only if not already cached)
   useEffect(() => {
     if (visible && !configFetchedRef.current) {
       configFetchedRef.current = true;
 
       const fetchAndMergeConfig = async () => {
+        if (!AgentClient.hasInstance()) return;
+
+        const client = AgentClient.getInstance();
+
+        // Check if config is already loaded/cached
+        if (client.isCustomerServiceConfigLoaded()) {
+          const cachedConfig = client.getCachedCustomerServiceConfig();
+          if (cachedConfig) {
+            const merged = mergeConfigWithDb(cachedConfig, userConfig);
+            setMergedConfig(merged);
+          }
+          return;
+        }
+
+        // Config not loaded yet, fetch it
         try {
           setIsLoadingConfig(true);
+          const dbConfig = await client.getCustomerServiceConfig();
 
-          if (AgentClient.hasInstance()) {
-            const dbConfig = await AgentClient.getInstance().getCustomerServiceConfig();
-
-            if (dbConfig) {
-              // Merge configs: user config overrides DB config, FAQs are combined
-              const merged = mergeConfigWithDb(dbConfig, userConfig);
-              setMergedConfig(merged);
-            }
+          if (dbConfig) {
+            const merged = mergeConfigWithDb(dbConfig, userConfig);
+            setMergedConfig(merged);
           }
         } catch (error) {
           console.warn('[CustomerServiceSheet] Failed to fetch config from backend:', error);

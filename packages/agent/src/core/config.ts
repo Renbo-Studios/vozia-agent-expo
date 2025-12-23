@@ -143,7 +143,7 @@ export function validateConfig(config: AgentConfig): void {
 /**
  * Merge user config with defaults
  */
-export function mergeConfig(config: AgentConfig): Required<Omit<AgentConfig, 'jwt'>> & Pick<AgentConfig, 'jwt'> {
+export function mergeConfig(config: AgentConfig): Required<Omit<AgentConfig, 'jwt' | 'orgId'>> & Pick<AgentConfig, 'jwt' | 'orgId'> {
   return {
     orgId: config.orgId,
     agentId: config.agentId,

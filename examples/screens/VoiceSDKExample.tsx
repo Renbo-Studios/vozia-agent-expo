@@ -1,9 +1,9 @@
 // ============================================================================
 // VOICE SDK EXAMPLE SCREEN
-// Demonstrates all Voice SDK components
+// Demonstrates all Voice SDK components with real voice functionality
 // ============================================================================
 
-import React, { useState } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   StyleSheet,
   Text,
@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Platform,
+  Alert,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -20,6 +21,7 @@ import {
   VoiceRecordButton,
   WaveformVisualizer,
   MicVisualizer,
+  useVoice,
 } from '@vozia/agent';
 
 // ============================================================================
@@ -54,37 +56,126 @@ export function VoiceSDKExample({ onBack }: VoiceSDKExampleProps) {
   const [showFullScreen, setShowFullScreen] = useState(false);
   const [activeDemo, setActiveDemo] = useState<string | null>(null);
 
-  // Demo states
-  const [isRecording, setIsRecording] = useState(false);
-  const [audioLevel, setAudioLevel] = useState(0);
+  // Use the actual voice hook from the SDK
+  const {
+    state: voiceState,
+    isInitialized,
+    isRecording,
+    isProcessing,
+    isPlaying,
+    currentLevel,
+    audioLevels,
+    transcription,
+    responseText,
+    error,
+    initialize,
+    startRecording,
+    stopRecording,
+    reset,
+  } = useVoice({
+    config: {
+      pushToTalk: true,
+      voiceId: 'Puck',
+    },
+    onRecordingStart: () => {
+      console.log('[VoiceSDKExample] Recording started');
+    },
+    onRecordingStop: (duration) => {
+      console.log(`[VoiceSDKExample] Recording stopped, duration: ${duration}ms`);
+    },
+    onTranscription: (text, isFinal) => {
+      console.log(`[VoiceSDKExample] Transcription: "${text}" (final: ${isFinal})`);
+    },
+    onResponseEnd: (text) => {
+      console.log(`[VoiceSDKExample] AI Response: "${text}"`);
+    },
+    onError: (err) => {
+      console.error('[VoiceSDKExample] Error:', err);
+      Alert.alert('Voice Error', err.message || 'An error occurred');
+    },
+  });
 
-  // Simulate audio level changes when recording
-  React.useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (isRecording) {
-      interval = setInterval(() => {
-        setAudioLevel(Math.random() * 0.8 + 0.2);
-      }, 100);
+  // Track if already initialized to prevent infinite loop
+  const hasInitialized = useRef(false);
+
+  // Initialize voice on mount (only once)
+  useEffect(() => {
+    if (hasInitialized.current) return;
+    hasInitialized.current = true;
+
+    initialize().catch((err) => {
+      console.error('[VoiceSDKExample] Failed to initialize:', err);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Handle push-to-talk button press
+  const handlePTTStart = useCallback(async () => {
+    setActiveDemo('ptt');
+    try {
+      await startRecording();
+    } catch (err) {
+      console.error('Failed to start recording:', err);
+    }
+  }, [startRecording]);
+
+  const handlePTTStop = useCallback(async () => {
+    try {
+      await stopRecording();
+    } catch (err) {
+      console.error('Failed to stop recording:', err);
+    }
+    // Keep activeDemo until processing is complete
+    if (!isProcessing) {
+      setActiveDemo(null);
+    }
+  }, [stopRecording, isProcessing]);
+
+  // Handle toggle recording button
+  const handleToggleRecording = useCallback(async () => {
+    if (activeDemo === 'record' && isRecording) {
+      await stopRecording();
+      setActiveDemo(null);
     } else {
-      setAudioLevel(0);
+      setActiveDemo('record');
+      await startRecording();
     }
-    return () => clearInterval(interval);
-  }, [isRecording]);
+  }, [activeDemo, isRecording, startRecording, stopRecording]);
 
-  // Generate fake audio levels for visualizer demo
-  const [audioLevels, setAudioLevels] = useState<Array<{ level: number; timestamp: number }>>([]);
-
-  React.useEffect(() => {
+  // Handle waveform demo
+  const handleWaveformDemo = useCallback(async () => {
     if (activeDemo === 'waveform') {
-      const interval = setInterval(() => {
-        setAudioLevels((prev) => {
-          const newLevels = [...prev, { level: Math.random(), timestamp: Date.now() }];
-          return newLevels.slice(-30);
-        });
-      }, 100);
-      return () => clearInterval(interval);
+      await stopRecording();
+      setActiveDemo(null);
+    } else {
+      setActiveDemo('waveform');
+      await startRecording();
     }
-  }, [activeDemo]);
+  }, [activeDemo, startRecording, stopRecording]);
+
+  // Handle mic visualizer demo
+  const handleMicDemo = useCallback(async () => {
+    if (activeDemo === 'mic') {
+      await stopRecording();
+      setActiveDemo(null);
+    } else {
+      setActiveDemo('mic');
+      await startRecording();
+    }
+  }, [activeDemo, startRecording, stopRecording]);
+
+  // Clear activeDemo when processing/playing is done
+  useEffect(() => {
+    if (!isRecording && !isProcessing && !isPlaying && activeDemo) {
+      // Small delay to show the result
+      const timeout = setTimeout(() => {
+        if (activeDemo !== 'waveform' && activeDemo !== 'mic') {
+          setActiveDemo(null);
+        }
+      }, 500);
+      return () => clearTimeout(timeout);
+    }
+  }, [isRecording, isProcessing, isPlaying, activeDemo]);
 
   if (showFullScreen) {
     return (
@@ -94,7 +185,10 @@ export function VoiceSDKExample({ onBack }: VoiceSDKExampleProps) {
           voiceId: 'Puck',
         }}
         showTranscript={true}
-        onSessionEnd={() => setShowFullScreen(false)}
+        onSessionEnd={() => {
+          reset();
+          setShowFullScreen(false);
+        }}
       />
     );
   }
@@ -118,6 +212,47 @@ export function VoiceSDKExample({ onBack }: VoiceSDKExampleProps) {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        {/* Status Banner */}
+        {(transcription || responseText || error) && (
+          <View style={styles.statusBanner}>
+            {error && (
+              <View style={styles.errorBanner}>
+                <Ionicons name="warning-outline" size={16} color="#EF4444" />
+                <Text style={styles.errorText}>{error}</Text>
+              </View>
+            )}
+            {transcription && (
+              <View style={styles.transcriptBanner}>
+                <Text style={styles.transcriptLabel}>You said:</Text>
+                <Text style={styles.transcriptText}>{transcription}</Text>
+              </View>
+            )}
+            {responseText && (
+              <View style={styles.responseBanner}>
+                <Text style={styles.responseLabel}>AI Response:</Text>
+                <Text style={styles.responseText}>{responseText}</Text>
+              </View>
+            )}
+          </View>
+        )}
+
+        {/* Voice State Indicator */}
+        <View style={styles.stateCard}>
+          <View style={styles.stateRow}>
+            <View style={[styles.stateIndicator, isInitialized && styles.stateActive]} />
+            <Text style={styles.stateText}>
+              {!isInitialized ? 'Initializing...' :
+               isRecording ? 'Recording...' :
+               isProcessing ? 'Processing...' :
+               isPlaying ? 'Playing response...' :
+               'Ready'}
+            </Text>
+          </View>
+          <Text style={styles.stateSubtext}>
+            Voice State: {voiceState} | Level: {(currentLevel * 100).toFixed(0)}%
+          </Text>
+        </View>
+
         {/* Full Screen Demo Card */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
@@ -134,9 +269,12 @@ export function VoiceSDKExample({ onBack }: VoiceSDKExampleProps) {
           <TouchableOpacity
             style={styles.demoButton}
             onPress={() => setShowFullScreen(true)}
+            disabled={!isInitialized}
           >
-            <Text style={styles.demoButtonText}>Open Full Screen</Text>
-            <Ionicons name="arrow-forward" size={18} color={THEME.primary} />
+            <Text style={[styles.demoButtonText, !isInitialized && styles.disabledText]}>
+              {isInitialized ? 'Open Full Screen' : 'Initializing...'}
+            </Text>
+            <Ionicons name="arrow-forward" size={18} color={isInitialized ? THEME.primary : THEME.textSecondary} />
           </TouchableOpacity>
         </View>
 
@@ -156,19 +294,19 @@ export function VoiceSDKExample({ onBack }: VoiceSDKExampleProps) {
           <View style={styles.demoArea}>
             <PushToTalkButton
               isRecording={isRecording && activeDemo === 'ptt'}
-              isProcessing={false}
-              audioLevel={audioLevel}
+              isProcessing={isProcessing && activeDemo === 'ptt'}
+              audioLevel={currentLevel}
               pushToTalk={true}
               size="large"
-              onRecordStart={() => {
-                setActiveDemo('ptt');
-                setIsRecording(true);
-              }}
-              onRecordStop={() => {
-                setIsRecording(false);
-                setActiveDemo(null);
-              }}
+              onRecordStart={handlePTTStart}
+              onRecordStop={handlePTTStop}
+              disabled={!isInitialized || (isRecording && activeDemo !== 'ptt')}
             />
+            {activeDemo === 'ptt' && (isProcessing || isPlaying) && (
+              <Text style={styles.demoLabel}>
+                {isProcessing ? 'Processing...' : 'Playing response...'}
+              </Text>
+            )}
           </View>
         </View>
 
@@ -188,19 +326,14 @@ export function VoiceSDKExample({ onBack }: VoiceSDKExampleProps) {
           <View style={styles.demoAreaRow}>
             <VoiceRecordButton
               isRecording={isRecording && activeDemo === 'record'}
-              onToggle={() => {
-                if (activeDemo === 'record' && isRecording) {
-                  setIsRecording(false);
-                  setActiveDemo(null);
-                } else {
-                  setActiveDemo('record');
-                  setIsRecording(true);
-                }
-              }}
+              onToggle={handleToggleRecording}
               size={64}
+              disabled={!isInitialized || (isRecording && activeDemo !== 'record')}
             />
             <Text style={styles.demoLabel}>
-              {isRecording && activeDemo === 'record' ? 'Recording...' : 'Tap to record'}
+              {isRecording && activeDemo === 'record' ? 'Recording... tap to stop' :
+               isProcessing && activeDemo === 'record' ? 'Processing...' :
+               'Tap to record'}
             </Text>
           </View>
         </View>
@@ -225,8 +358,8 @@ export function VoiceSDKExample({ onBack }: VoiceSDKExampleProps) {
             <View style={styles.visualizerContainer}>
               <WaveformVisualizer
                 levels={audioLevels}
-                currentLevel={audioLevel}
-                isActive={activeDemo === 'waveform'}
+                currentLevel={currentLevel}
+                isActive={activeDemo === 'waveform' && isRecording}
                 height={60}
                 variant="bars"
                 barCount={25}
@@ -241,8 +374,8 @@ export function VoiceSDKExample({ onBack }: VoiceSDKExampleProps) {
             <View style={styles.visualizerContainer}>
               <WaveformVisualizer
                 levels={audioLevels}
-                currentLevel={activeDemo === 'waveform' ? audioLevel : 0.1}
-                isActive={activeDemo === 'waveform'}
+                currentLevel={activeDemo === 'waveform' ? currentLevel : 0.1}
+                isActive={activeDemo === 'waveform' && isRecording}
                 height={100}
                 variant="circle"
                 color={THEME.primary}
@@ -253,25 +386,21 @@ export function VoiceSDKExample({ onBack }: VoiceSDKExampleProps) {
           <TouchableOpacity
             style={[
               styles.demoButton,
-              activeDemo === 'waveform' && styles.demoButtonActive,
+              activeDemo === 'waveform' && isRecording && styles.demoButtonActive,
             ]}
-            onPress={() => {
-              if (activeDemo === 'waveform') {
-                setActiveDemo(null);
-                setIsRecording(false);
-              } else {
-                setActiveDemo('waveform');
-                setIsRecording(true);
-              }
-            }}
+            onPress={handleWaveformDemo}
+            disabled={!isInitialized || (isRecording && activeDemo !== 'waveform')}
           >
             <Text
               style={[
                 styles.demoButtonText,
-                activeDemo === 'waveform' && styles.demoButtonTextActive,
+                activeDemo === 'waveform' && isRecording && styles.demoButtonTextActive,
+                !isInitialized && styles.disabledText,
               ]}
             >
-              {activeDemo === 'waveform' ? 'Stop Demo' : 'Start Demo'}
+              {activeDemo === 'waveform' && isRecording ? 'Stop Recording' :
+               activeDemo === 'waveform' && isProcessing ? 'Processing...' :
+               'Start Recording'}
             </Text>
           </TouchableOpacity>
         </View>
@@ -291,25 +420,20 @@ export function VoiceSDKExample({ onBack }: VoiceSDKExampleProps) {
           </View>
           <View style={styles.demoArea}>
             <TouchableOpacity
-              onPress={() => {
-                if (activeDemo === 'mic') {
-                  setActiveDemo(null);
-                  setIsRecording(false);
-                } else {
-                  setActiveDemo('mic');
-                  setIsRecording(true);
-                }
-              }}
+              onPress={handleMicDemo}
+              disabled={!isInitialized || (isRecording && activeDemo !== 'mic')}
             >
               <MicVisualizer
-                level={activeDemo === 'mic' ? audioLevel : 0}
-                isRecording={activeDemo === 'mic'}
+                level={activeDemo === 'mic' ? currentLevel : 0}
+                isRecording={activeDemo === 'mic' && isRecording}
                 color={THEME.primary}
                 size={100}
               />
             </TouchableOpacity>
             <Text style={styles.demoLabel}>
-              {activeDemo === 'mic' ? 'Tap to stop' : 'Tap to demo'}
+              {activeDemo === 'mic' && isRecording ? 'Tap to stop' :
+               activeDemo === 'mic' && isProcessing ? 'Processing...' :
+               'Tap to record'}
             </Text>
           </View>
         </View>
@@ -357,6 +481,99 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: THEME.background,
+  },
+
+  // Status Banner
+  statusBanner: {
+    backgroundColor: THEME.surface,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: THEME.border,
+  },
+  errorBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  errorText: {
+    color: '#EF4444',
+    fontSize: 14,
+    flex: 1,
+  },
+  transcriptBanner: {
+    marginBottom: 8,
+  },
+  transcriptLabel: {
+    fontSize: 12,
+    color: THEME.textSecondary,
+    marginBottom: 4,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  transcriptText: {
+    fontSize: 15,
+    color: THEME.text,
+    lineHeight: 22,
+  },
+  responseBanner: {
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: THEME.border,
+  },
+  responseLabel: {
+    fontSize: 12,
+    color: THEME.primary,
+    marginBottom: 4,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  responseText: {
+    fontSize: 15,
+    color: THEME.text,
+    lineHeight: 22,
+  },
+
+  // State Card
+  stateCard: {
+    backgroundColor: THEME.surface,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: THEME.border,
+  },
+  stateRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  stateIndicator: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#EF4444',
+  },
+  stateActive: {
+    backgroundColor: '#10B981',
+  },
+  stateText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: THEME.text,
+  },
+  stateSubtext: {
+    fontSize: 12,
+    color: THEME.textSecondary,
+    marginTop: 8,
+  },
+
+  // Disabled state
+  disabledText: {
+    color: THEME.textSecondary,
   },
 
   // Header

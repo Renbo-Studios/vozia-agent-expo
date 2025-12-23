@@ -108,6 +108,8 @@ export const DEFAULT_CONFIG: Required<Omit<CustomerServiceConfig,
   logo: undefined,
   companyName: 'Support',
   welcomeMessage: DEFAULT_LABELS.welcomeMessage,
+  greeting: 'Hi there 👋',
+  tagline: 'How can we help?',
 
   // Theme
   theme: DEFAULT_CUSTOMER_SERVICE_THEME,

@@ -123,6 +123,11 @@ export function useVoice(options: UseVoiceOptions = {}): UseVoiceReturn {
 
   // Initialize voice service
   const initialize = useCallback(async () => {
+    // Already initialized - skip
+    if (voiceServiceRef.current && isInitialized) {
+      return;
+    }
+
     if (!features.voice) {
       setError('Voice feature is disabled');
       return;
@@ -134,48 +139,51 @@ export function useVoice(options: UseVoiceOptions = {}): UseVoiceReturn {
     }
 
     try {
-      const httpClient = new HttpClient({
-        baseUrl: agentConfig.baseUrl || 'https://api.vozia.ai',
-        apiKey: agentConfig.apiKey,
-        jwt: agentConfig.jwt,
-        debug,
-      });
+      // Only create new service if one doesn't exist
+      if (!voiceServiceRef.current) {
+        const httpClient = new HttpClient({
+          baseUrl: agentConfig.baseUrl || 'https://api.vozia.ai',
+          apiKey: agentConfig.apiKey,
+          jwt: agentConfig.jwt,
+          debug,
+        });
 
-      voiceServiceRef.current = new VoiceService({
-        httpClient,
-        assistantId: agentConfig.assistantId,
-        userId: agentConfig.userId,
-        voiceConfig: { ...voiceConfig, ...options.config },
-        debug,
-      });
+        voiceServiceRef.current = new VoiceService({
+          httpClient,
+          assistantId: agentConfig.agentId,
+          userId: agentConfig.userId,
+          voiceConfig: { ...voiceConfig, ...options.config },
+          debug,
+        });
 
-      // Setup event listeners
-      voiceServiceRef.current.on('state_change', (event) => {
-        setVoiceState(event.state);
-      });
+        // Setup event listeners
+        voiceServiceRef.current.on('state_change', (event) => {
+          setVoiceState(event.state);
+        });
 
-      voiceServiceRef.current.on('audio_level', (event) => {
-        addAudioLevel(event.level);
-      });
+        voiceServiceRef.current.on('audio_level', (event) => {
+          addAudioLevel(event.level);
+        });
 
-      voiceServiceRef.current.on('transcription', (event) => {
-        setTranscription(event.text);
-        options.onTranscription?.(event.text, event.isFinal);
-      });
+        voiceServiceRef.current.on('transcription', (event) => {
+          setTranscription(event.text);
+          options.onTranscription?.(event.text, event.isFinal);
+        });
 
-      voiceServiceRef.current.on('response_start', () => {
-        options.onResponseStart?.();
-      });
+        voiceServiceRef.current.on('response_start', () => {
+          options.onResponseStart?.();
+        });
 
-      voiceServiceRef.current.on('response_end', (event) => {
-        setResponseText(event.text);
-        options.onResponseEnd?.(event.text);
-      });
+        voiceServiceRef.current.on('response_end', (event) => {
+          setResponseText(event.text);
+          options.onResponseEnd?.(event.text);
+        });
 
-      voiceServiceRef.current.on('error', (event) => {
-        setError(event.error.message);
-        options.onError?.(event.error);
-      });
+        voiceServiceRef.current.on('error', (event) => {
+          setError(event.error.message);
+          options.onError?.(event.error);
+        });
+      }
 
       await voiceServiceRef.current.initialize();
       setInitialized(true);
@@ -186,6 +194,7 @@ export function useVoice(options: UseVoiceOptions = {}): UseVoiceReturn {
       options.onError?.({ code: 'VOICE_ERROR', message: errorMessage });
     }
   }, [
+    isInitialized,
     features.voice,
     agentConfig,
     voiceConfig,
@@ -355,12 +364,15 @@ export function useVoice(options: UseVoiceOptions = {}): UseVoiceReturn {
     resetStore();
   }, [resetStore]);
 
-  // Apply initial config
+  // Apply initial config (only once on mount)
+  const hasAppliedConfig = useRef(false);
   useEffect(() => {
-    if (options.config) {
+    if (options.config && !hasAppliedConfig.current) {
+      hasAppliedConfig.current = true;
       setConfigStore(options.config);
     }
-  }, [options.config, setConfigStore]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Cleanup on unmount
   useEffect(() => {

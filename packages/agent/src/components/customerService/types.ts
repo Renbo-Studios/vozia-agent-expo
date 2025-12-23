@@ -165,6 +165,10 @@ export interface CustomerServiceConfig {
   companyName?: string;
   /** Welcome/greeting message */
   welcomeMessage?: string;
+  /** Short greeting text (e.g. "Hi there 👋") */
+  greeting?: string;
+  /** Tagline under greeting (e.g. "How can we help?") */
+  tagline?: string;
 
   // ----- Theme Overrides -----
   theme?: CustomerServiceTheme;

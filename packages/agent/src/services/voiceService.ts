@@ -75,6 +75,9 @@ export class VoiceService {
   // Expo-av modules (lazy loaded)
   private Audio: typeof import('expo-av').Audio | null = null;
 
+  // Track initialization state
+  private isInitialized = false;
+
   constructor(config: VoiceServiceConfig) {
     this.config = config;
     this.eventEmitter = new EventEmitter<VoiceEvent>();
@@ -88,6 +91,12 @@ export class VoiceService {
    * Initialize audio permissions and modules
    */
   async initialize(): Promise<void> {
+    // Guard against double initialization
+    if (this.isInitialized) {
+      this.log('Voice service already initialized', {}, 'warn');
+      return;
+    }
+
     try {
       // Dynamically import expo-av
       const ExpoAV = await import('expo-av');
@@ -108,6 +117,7 @@ export class VoiceService {
         playThroughEarpieceAndroid: false,
       });
 
+      this.isInitialized = true;
       this.log('Voice service initialized');
     } catch (error) {
       this.log('Failed to initialize voice service', { error }, 'error');
@@ -436,9 +446,9 @@ export class VoiceService {
    */
   private async readAudioFile(uri: string): Promise<string> {
     try {
-      const FileSystem = await import('expo-file-system');
-      const base64 = await FileSystem.readAsStringAsync(uri, {
-        encoding: FileSystem.EncodingType.Base64,
+      const { readAsStringAsync } = await import('expo-file-system');
+      const base64 = await readAsStringAsync(uri, {
+        encoding: 'base64',
       });
       return base64;
     } catch {

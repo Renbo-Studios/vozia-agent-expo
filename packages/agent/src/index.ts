@@ -110,7 +110,7 @@ export type {
   StyleProps,
   BaseComponentProps,
   ButtonPosition,
-  AssistantButtonProps,
+  AgentButtonProps,
   AgentChatProps,
   VoiceAssistantScreenProps,
 } from './types';
@@ -136,8 +136,8 @@ export {
   type UseVoiceReturn,
   type UseToolsOptions,
   type UseToolsReturn,
-  type UseAssistantButtonOptions,
-  type UseAssistantButtonReturn,
+  type UseAgentButtonOptions,
+  type UseAgentButtonReturn,
   type UseCustomerServiceOptions,
   type UseCustomerServiceReturn,
 } from './hooks';
@@ -172,8 +172,8 @@ export {
   CompactVoiceButton,
 
   // Common
-  AssistantButton,
-  AssistantFAB,
+  AgentButton,
+  AgentFAB,
   FloatingButton,
 
   // Support
@@ -216,7 +216,7 @@ export {
   type MicVisualizerProps,
   type CompactVoiceButtonProps,
   type FloatingButtonProps,
-  type AssistantFABProps,
+  type AgentFABProps,
   type SupportScreenProps,
   type TicketListProps,
 

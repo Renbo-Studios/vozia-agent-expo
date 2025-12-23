@@ -2,7 +2,7 @@
   "name": "vozia-agent-expo",
   "version": "1.0.0",
   "description": "Vozia AI Agent SDK for Expo/React Native",
-  "private": true,
+
   "workspaces": [
     "packages/*",
     "examples/*"
